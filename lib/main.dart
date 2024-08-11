@@ -1,43 +1,43 @@
-import 'package:ecore/HomePage/home_page_menu.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:provider/provider.dart';
-
-import 'models/firebase_auth_state.dart';
-import 'models/firestore/user_model.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<FirebaseAuthState>(
-          create: (_) => FirebaseAuthState(),
-        ),
-        ChangeNotifierProxyProvider<FirebaseAuthState, UserModel>(
-          create: (context) => UserModel(),
-          update: (context, authState, userModel) {
-            if (authState.user != null) {
-              userModel?.fetchUserData(authState.user!.uid);
-            }
-            return userModel!;
-          },
-        ),
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: HomePage(),
-      ),
-    );
-  }
-}
+// import 'package:ecore/HomePage/home_page_menu.dart';
+// import 'package:flutter/material.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:provider/provider.dart';
+//
+// import 'models/firebase_auth_state.dart';
+// import 'models/firestore/user_model.dart';
+//
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp();
+//
+//   runApp(MyApp());
+// }
+//
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MultiProvider(
+//       providers: [
+//         ChangeNotifierProvider<FirebaseAuthState>(
+//           create: (_) => FirebaseAuthState(),
+//         ),
+//         ChangeNotifierProxyProvider<FirebaseAuthState, UserModel>(
+//           create: (context) => UserModel(),
+//           update: (context, authState, userModel) {
+//             if (authState.user != null) {
+//               userModel?.fetchUserData(authState.user!.uid);
+//             }
+//             return userModel!;
+//           },
+//         ),
+//       ],
+//       child: MaterialApp(
+//         debugShowCheckedModeBanner: false,
+//         home: HomePage(),
+//       ),
+//     );
+//   }
+// }
 
 
 
