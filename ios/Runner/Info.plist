@@ -45,5 +45,21 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to your photo library to upload images.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>We need access to your camera to take pictures for upload.</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+            <string>com.googleusercontent.apps.795075128601-1ijqtatbj7210vkjr19u5h2vi2cmnueg</string>
+            </array>
+        </dict>
+    </array>
+
 </dict>
 </plist>
