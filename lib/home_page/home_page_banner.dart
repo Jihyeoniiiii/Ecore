@@ -91,49 +91,52 @@ class _TitleBannerState extends State<TitleBanner> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 20),
-              child: Center(child: CareouselSlider()),
-            ),
-            HorizontalListSection(
-              stream: businessSellPostsStream(), // Stream 설정
-              title: '믿고 거래하는 에코리 상품',
-              onMorePressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BusinessMarketPost(), // 실제 페이지로 변경
-                  ),
-                );
-              },
-            ),
-            HorizontalListSection(
-              stream: userModel.recentlyViewedStream,
-              title: '최근 본 상품',
-              onMorePressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecentViewedPage(),
-                  ),
-                );
-              },
-            ),
-            HorizontalListSection(
-              stream: userModel.favoriteListStream,
-              title: '찜한 상품',
-              onMorePressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FavoriteListPage(), // 실제 페이지로 변경
-                  ),
-                );
-              },
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 20),
+                child: Center(child: CareouselSlider()),
+              ),
+              HorizontalListSection(
+                stream: businessSellPostsStream(), // Stream 설정
+                title: '믿고 거래하는 에코리 상품',
+                onMorePressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BusinessMarketPost(), // 실제 페이지로 변경
+                    ),
+                  );
+                },
+              ),
+              HorizontalListSection(
+                stream: userModel.recentlyViewedStream,
+                title: '최근 본 상품',
+                onMorePressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecentViewedPage(),
+                    ),
+                  );
+                },
+              ),
+              HorizontalListSection(
+                stream: userModel.favoriteListStream,
+                title: '찜한 상품',
+                onMorePressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FavoriteListPage(), // 실제 페이지로 변경
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

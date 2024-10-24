@@ -1,8 +1,7 @@
+import 'package:ecore/my_page/my_page_banner.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';  // For input formatters
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'create_market_info.dart';
 
@@ -66,7 +65,15 @@ class _SellerInfoFormState extends State<SellerInfoForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('판매자 정보 입력'),
+        title: Text('판매자 정보 입력', style: TextStyle(fontFamily: 'NanumSquare',)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => MyPageBanner()),
+              );
+            }
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
