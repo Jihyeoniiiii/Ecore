@@ -7,6 +7,7 @@ import 'models/firebase_auth_state.dart';
 import 'models/firestore/user_model.dart';
 import 'package:ecore/home_page/home_page_menu.dart';
 import 'package:ecore/signinup_page/sign_in_form.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,23 +44,31 @@ class MyApp extends StatelessWidget {
             titleTextStyle: TextStyle(color: Colors.black, fontSize: 22.0, fontWeight: FontWeight.bold),
           ),
         ),
-        // home: SplashScreen(),
         home: MyAppContent(),
       ),
     );
   }
 }
 
-
 class MyAppContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<FirebaseAuthState>(
       builder: (context, authState, _) {
-        return authState.firebaseAuthStatus == FirebaseAuthStatus.signin
-            ? HomePage() // 로그인 상태이면 홈 화면
-            : SignInForm(); // 비로그인 상태이면 로그인 화면
+        // 사용자의 인증 상태 확인
+        if (authState.user != null) {
+          // 인증 이메일이 전송된 경우에는 처리하지 않음
+          if (authState.user!.emailVerified) {
+            return HomePage(); // 로그인 상태이면 홈 화면
+          } else {
+            // 이메일 인증을 위한 메시지 표시 (홈 화면으로 보내지 않음)
+            return SignInForm(); // 비로그인 상태이면 로그인 화면
+          }
+        }
+
+        return SignInForm(); // 비로그인 상태이면 로그인 화면
       },
     );
   }
 }
+
