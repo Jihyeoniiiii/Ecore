@@ -367,6 +367,7 @@ class _ChatListState extends State<ChatList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('채팅', style: TextStyle(fontFamily: 'NanumSquare',),),
       ),
       body: StreamBuilder<List<ChatModel>>(
