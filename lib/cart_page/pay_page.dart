@@ -768,8 +768,11 @@ class _PayPageState extends State<PayPage> {
                   height: 30,
                   child: TextField(
                     controller: _pointController, // 포인트 입력 필드 컨트롤러
+                    textAlign: TextAlign.left,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 8), // 세로 중앙에 위치하도록 패딩 설정
+
                     ),
                   ),
                 ),
