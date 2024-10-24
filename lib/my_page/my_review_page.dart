@@ -101,7 +101,7 @@ class _MyReviewPageState extends State<MyReviewPage> {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('리뷰를 가져오는 중 오류가 발생했습니다.'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
             return Center(child: Text('작성한 리뷰가 없습니다.'));
           }
 
@@ -155,7 +155,7 @@ class _MyReviewPageState extends State<MyReviewPage> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    // 내 기부글 후기 페이지로 이동
+                    // 설정 -> 받은 거래 상세로 라우팅
                   },
                   child: Text('내 기부글 후기'),
                 ),

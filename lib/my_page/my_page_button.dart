@@ -92,7 +92,7 @@ class _MyPageBtnState extends State<MyPageBtn> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Market Not Found'),
+          title: Text('마켓이 없습니다!'),
           content: Text('생성하시겠습니까?'),
           actions: [
             TextButton(
@@ -220,10 +220,18 @@ class _MyPageBtnState extends State<MyPageBtn> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MyReviewPage(userModel: userModel!,)),
-                    );
+                    if (userModel != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyReviewPage(userModel: userModel!),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('사용자 정보가 없습니다.')),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: baseColor, // 배경색 설정
