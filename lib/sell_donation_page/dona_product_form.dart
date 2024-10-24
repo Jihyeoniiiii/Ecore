@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 
 class DonaProductForm extends StatefulWidget {
   @override
@@ -27,6 +31,7 @@ class _DonaProductFormState extends State<DonaProductForm> {
   final TextEditingController _pointController = TextEditingController(); // 포인트 입력 필드
   String? _categoryValue;
   String? _selectedCondition = 'S';
+  String _serverUrl = 'http://your-flask-server-ip:5000/upload';
 
   Future<void> getImages() async {
     if (_images!.length >= 10) {
@@ -80,6 +85,32 @@ class _DonaProductFormState extends State<DonaProductForm> {
     return downloadUrls;
   }
 
+  Future<Map<String, dynamic>?> uploadImageToFlask(XFile imageFile) async {
+    try {
+      var uri = Uri.parse(_serverUrl);
+
+      var request = http.MultipartRequest('POST', uri);
+      request.files.add(await http.MultipartFile.fromPath(
+        'file',
+        imageFile.path,
+        filename: path.basename(imageFile.path),
+      ));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseData = await http.Response.fromStream(response);
+        return jsonDecode(responseData.body); // 서버에서 받은 JSON 데이터를 Map으로 변환
+      } else {
+        print('이미지 업로드 실패: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('이미지 업로드 중 오류 발생: $e');
+      return null;
+    }
+  }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final title = _titleController.text;
@@ -88,17 +119,28 @@ class _DonaProductFormState extends State<DonaProductForm> {
       final color = _colorController.text;
       final condition = _selectedCondition;
       final body = _bodyController.text;
-      final point = int.tryParse(_pointController.text) ?? 0; // 포인트 입력 값
+      final point = int.tryParse(_pointController.text) ?? 0;
 
       _showLoadingDialog();
 
       try {
-        List<String>? imageUrls;
+        List<String> imageUrls = [];
+        List<Map<String, dynamic>> results = [];  // 이미지 처리 결과 저장
+
         if (_images != null && _images!.isNotEmpty) {
-          imageUrls = await uploadImages(_images!);
+          // 이미지를 Flask 서버로 업로드하고 면적/등급 정보 받기
+          for (XFile image in _images!) {
+            Map<String, dynamic>? result = await uploadImageToFlask(image); // Flask 서버에 이미지 업로드
+            if (result != null) {
+              imageUrls.add(result['image_url']);  // 이미지를 서버에 업로드하고 URL 받기
+              results.add({'area': result['area'], 'grade': result['grade']});  // 처리 결과 받기
+            } else {
+              throw Exception('Image upload failed');
+            }
+          }
         }
 
-        // 현재 사용자의 UID를 user 필드로 추가
+        // Firestore에 상품 정보와 함께 이미지 URL 및 결과값(면적, 등급) 저장
         DocumentReference docRef = await _firestore.collection('DonaPosts').add({
           'title': title,
           'category': category,
@@ -106,11 +148,12 @@ class _DonaProductFormState extends State<DonaProductForm> {
           'color': color,
           'condition': condition,
           'body': body,
-          'img': imageUrls,
+          'img': imageUrls, // 서버로부터 받은 이미지 URL들 저장
           'viewCount': 0,
           'createdAt': FieldValue.serverTimestamp(),
           'userId': currentUser?.uid, // 현재 사용자의 UID 추가
           'point': point, // 포인트 필드 추가
+          'results': results,  // 면적과 등급 정보 저장
         });
 
         // Users 컬렉션의 my_posts 배열에 문서 ID 추가
@@ -118,7 +161,7 @@ class _DonaProductFormState extends State<DonaProductForm> {
           'my_posts': FieldValue.arrayUnion([docRef.id]) // 새로운 문서 ID 추가
         });
 
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('기부 상품이 등록되었습니다.')),
@@ -127,7 +170,6 @@ class _DonaProductFormState extends State<DonaProductForm> {
         Navigator.pop(context);
       } catch (e) {
         Navigator.of(context).pop();
-
         print('Error adding document: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('문서 추가 실패: $e')),

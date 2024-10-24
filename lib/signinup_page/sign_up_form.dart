@@ -29,107 +29,68 @@ class _SignUpFormState extends State<SignUpForm> {
 
   Future<void> _sendVerificationEmail() async {
     try {
-      // Firestore에 임시 사용자 정보 저장
-      await FirebaseFirestore.instance.collection('TempUsers').doc(_emailController.text).set({
-        'email': _emailController.text,
-        'password': _pwController.text,
-        'phone': _phoneController.text,
-        'createdAt': Timestamp.now(),
-      });
+      // Create a new user with email and password
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _pwController.text,
+      );
 
-      // 이메일 인증 전송
-      await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+      // Get the newly created user
+      User? user = userCredential.user;
 
-      setState(() {
-        _isEmailSent = true;
-      });
-
-      if (mounted) {
+      if (user != null) {
+        // Send email verification
+        await user.sendEmailVerification();
+        setState(() {
+          _isEmailSent = true;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('이메일 인증을 전송했습니다. 이메일을 확인해 주세요.')),
         );
       }
     } catch (e) {
       print('Error sending verification email: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('이메일 인증을 보낼 수 없습니다.')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('이메일 인증을 보낼 수 없습니다.')),
+      );
     }
   }
 
   Future<void> _completeSignUp() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        // FirebaseAuth는 계정이 생성되지 않았으므로 이메일 인증 후에만 계정을 생성
-        await _createAccountIfVerified();
+        // Sign in the user
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text,
+          password: _pwController.text,
+        );
+
+        User? user = userCredential.user;
+        if (user != null && user.emailVerified) {
+          // 이메일 인증 확인 후 Firestore에 사용자 정보 저장
+          await _saveUserToFirestore(user);
+
+          // Finalize sign up process
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('회원가입이 완료되었습니다.')),
+          );
+
+          // Navigate to the sign-in page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => SignInForm()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('이메일 인증이 필요합니다.')),
+          );
+        }
       } catch (e) {
         print('Error completing sign up: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('회원가입 완료에 실패했습니다.')),
         );
       }
-    }
-  }
-
-  Future<void> _createAccountIfVerified() async {
-    try {
-      // FirebaseAuth에서 계정이 없는 상태이므로 Firebase에 계정을 생성하기 전에 이메일 인증을 확인
-      User? user = FirebaseAuth.instance.currentUser;
-
-      if (user != null) {
-        await user.reload();  // 유저 상태 업데이트
-        user = FirebaseAuth.instance.currentUser;
-
-        // 이메일 인증 확인
-        if (user != null && user.emailVerified) {
-          // 이메일 인증이 완료되면 Firebase Authentication에 계정 생성
-          DocumentSnapshot tempUserDoc = await FirebaseFirestore.instance
-              .collection('TempUsers')
-              .doc(_emailController.text)
-              .get();
-
-          if (tempUserDoc.exists) {
-            String password = tempUserDoc['password'];
-
-            // Firebase Authentication에 계정 생성
-            UserCredential userCredential = await FirebaseAuth.instance
-                .createUserWithEmailAndPassword(
-              email: _emailController.text,
-              password: password,
-            );
-
-            user = userCredential.user;
-
-            if (user != null) {
-              // Firestore에 사용자 정보 저장
-              await _saveUserToFirestore(user);
-
-              // 임시 사용자 정보 삭제
-              await FirebaseFirestore.instance
-                  .collection('TempUsers')
-                  .doc(_emailController.text)
-                  .delete();
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('회원가입이 완료되었습니다.')),
-              );
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => SignInForm()),
-              );
-            }
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('이메일 인증이 필요합니다.')),
-          );
-        }
-      }
-    } catch (e) {
-      print('Error creating account: $e');
     }
   }
 
@@ -148,6 +109,7 @@ class _SignUpFormState extends State<SignUpForm> {
       print('Error saving user to Firestore: $e');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -242,10 +204,26 @@ class _SignUpFormState extends State<SignUpForm> {
           children: [
             Text('이미 계정이 있으신가요? '),
             GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => SignInForm()),
-                );
+              onTap: () async {
+                // 현재 사용자 삭제
+                User? user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  try {
+                    await user.delete();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('회원 가입을 취소하였습니다.')),
+                    );
+                    // 로그인 화면으로 이동
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => SignInForm()),
+                    );
+                  } catch (e) {
+                    print('Error deleting user: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('회원가입 취소에 실패했습니다.')),
+                    );
+                  }
+                }
               },
               child: Text(
                 '로그인하기',
