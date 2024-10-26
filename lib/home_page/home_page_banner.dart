@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/firestore/sell_post_model.dart';
 import '../models/firestore/user_model.dart';
-import '../models/firestore/market_model.dart'; // MarketModel import
 import '../my_page/favorite_list_page.dart';
 import '../my_page/recently_viewed_page.dart';
 import '../search/search_screen.dart';
@@ -11,6 +10,7 @@ import 'business_market_post.dart';
 import 'carousel_slider.dart';
 import 'horizontal_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/firebase_auth_state.dart'; // FirebaseAuthState import 추가
 
 class TitleBanner extends StatefulWidget {
   const TitleBanner({super.key});
@@ -60,6 +60,10 @@ class _TitleBannerState extends State<TitleBanner> {
     });
   }
 
+  void _signOut() async {
+    await Provider.of<FirebaseAuthState>(context, listen: false).signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     final userModel = Provider.of<UserModel>(context);
@@ -69,10 +73,10 @@ class _TitleBannerState extends State<TitleBanner> {
         title: Row(
           children: [
             Image.asset(
-              'assets/images/logo.png',
-              height: 40,
+              'assets/images/ecore_logo.png', // 로고 이미지 경로
+              height: 40, // 로고의 높이를 설정 (필요에 따라 크기 조정)
             ),
-            Spacer(),
+            Spacer(), // 텍스트와 검색 아이콘 사이의 공간 확보
             IconButton(
               onPressed: () {
                 Navigator.push(
@@ -87,56 +91,60 @@ class _TitleBannerState extends State<TitleBanner> {
                 color: Colors.blue[900],
               ),
             ),
+            IconButton(
+              onPressed: _signOut, // 로그아웃 메서드 호출
+              icon: Icon(
+                Icons.logout,
+                color: Colors.red, // 로그아웃 아이콘 색상
+              ),
+            ),
           ],
         ),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(5.0),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 20),
-                child: Center(child: CareouselSlider()),
-              ),
-              HorizontalListSection(
-                stream: businessSellPostsStream(), // Stream 설정
-                title: '믿고 거래하는 에코리 상품',
-                onMorePressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BusinessMarketPost(), // 실제 페이지로 변경
-                    ),
-                  );
-                },
-              ),
-              HorizontalListSection(
-                stream: userModel.recentlyViewedStream,
-                title: '최근 본 상품',
-                onMorePressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RecentViewedPage(),
-                    ),
-                  );
-                },
-              ),
-              HorizontalListSection(
-                stream: userModel.favoriteListStream,
-                title: '찜한 상품',
-                onMorePressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FavoriteListPage(), // 실제 페이지로 변경
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 20),
+              child: Center(child: CareouselSlider()),
+            ),
+            HorizontalListSection(
+              stream: businessSellPostsStream(), // Stream 설정
+              title: '사업자 등록된 마켓의 상품',
+              onMorePressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BusinessMarketPost(), // 실제 페이지로 변경
+                  ),
+                );
+              },
+            ),
+            HorizontalListSection(
+              stream: userModel.recentlyViewedStream,
+              title: '최근 본 상품',
+              onMorePressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecentViewedPage(),
+                  ),
+                );
+              },
+            ),
+            HorizontalListSection(
+              stream: userModel.favoriteListStream,
+              title: '찜한 상품',
+              onMorePressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FavoriteListPage(), // 실제 페이지로 변경
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
