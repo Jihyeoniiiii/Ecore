@@ -200,6 +200,11 @@ class FirebaseAuthState extends ChangeNotifier {
 
   FirebaseAuthStatus get firebaseAuthStatus => _firebaseAuthStatus;
   User? get user => _user;
+
+  void updateAuthStatus(FirebaseAuthStatus status) {
+    _firebaseAuthStatus = status;
+    notifyListeners();
+  }
 }
 
 enum FirebaseAuthStatus {

@@ -44,24 +44,36 @@ class _ChatListState extends State<ChatList> {
     try {
       final marketId = await _getMarketIdForUser(userId);
 
+      if (marketId == null) {
+        print('marketId is null. Showing only user chats for $userId');
+      }
+
+      // 유저 아이디에 해당하는 채팅 쿼리 생성
       final userChatsQuery = FirebaseFirestore.instance
           .collection(COLLECTION_CHATS)
           .where('users', arrayContains: userId)
           .snapshots();
 
-      final marketChatsQuery = FirebaseFirestore.instance
+      // marketId가 있을 경우에만 마켓 채팅 쿼리 생성
+      final marketChatsQuery = marketId != null
+          ? FirebaseFirestore.instance
           .collection(COLLECTION_CHATS)
           .where('users', arrayContains: marketId)
-          .snapshots();
+          .snapshots()
+          : Stream<QuerySnapshot<Map<String, dynamic>>>.empty();
 
-      CombineLatestStream.list([userChatsQuery, marketChatsQuery])
-          .listen((snapshots) {
+      // marketId가 없으면 userChatsQuery만 처리
+      final streamsToCombine = marketId != null
+          ? [userChatsQuery, marketChatsQuery]
+          : [userChatsQuery];
+
+      CombineLatestStream.list(streamsToCombine).listen((snapshots) {
         final userChatsSnapshot = snapshots[0];
-        final marketChatsSnapshot = snapshots[1];
+        final marketChatsSnapshot = marketId != null ? snapshots[1] : null;
 
-        List<Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>>>
-            messageStreams = [];
+        List<Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>>> messageStreams = [];
 
+        // 유저 채팅 메시지 스트림 추가
         for (var chatDoc in userChatsSnapshot.docs) {
           final chatId = chatDoc.id;
 
@@ -85,36 +97,44 @@ class _ChatListState extends State<ChatList> {
           messageStreams.add(receivedMessagesStream);
         }
 
-        for (var chatDoc in marketChatsSnapshot.docs) {
-          final chatId = chatDoc.id;
+        // 마켓 채팅 메시지 추가 (marketId가 있는 경우에만)
+        if (marketId != null && marketChatsSnapshot != null) {
+          for (var chatDoc in marketChatsSnapshot.docs) {
+            final chatId = chatDoc.id;
 
-          final marketSentMessagesStream = FirebaseFirestore.instance
-              .collection(COLLECTION_CHATS)
-              .doc(chatId)
-              .collection(COLLECTION_MESSAGES)
-              .where(KEY_SEND_USERID, isEqualTo: marketId)
-              .snapshots()
-              .map((snapshot) => snapshot.docs);
+            final marketSentMessagesStream = FirebaseFirestore.instance
+                .collection(COLLECTION_CHATS)
+                .doc(chatId)
+                .collection(COLLECTION_MESSAGES)
+                .where(KEY_SEND_USERID, isEqualTo: marketId)
+                .snapshots()
+                .map((snapshot) => snapshot.docs);
 
-          final marketReceivedMessagesStream = FirebaseFirestore.instance
-              .collection(COLLECTION_CHATS)
-              .doc(chatId)
-              .collection(COLLECTION_MESSAGES)
-              .where(KEY_RECEIVE_USERID, isEqualTo: marketId)
-              .snapshots()
-              .map((snapshot) => snapshot.docs);
+            final marketReceivedMessagesStream = FirebaseFirestore.instance
+                .collection(COLLECTION_CHATS)
+                .doc(chatId)
+                .collection(COLLECTION_MESSAGES)
+                .where(KEY_RECEIVE_USERID, isEqualTo: marketId)
+                .snapshots()
+                .map((snapshot) => snapshot.docs);
 
-          messageStreams.add(marketSentMessagesStream);
-          messageStreams.add(marketReceivedMessagesStream);
+            messageStreams.add(marketSentMessagesStream);
+            messageStreams.add(marketReceivedMessagesStream);
+          }
         }
 
+        // 모든 메시지 스트림 결합
         CombineLatestStream.list(messageStreams).listen((snapshots) {
           final allMessages = snapshots
               .expand((snapshot) =>
-                  snapshot as List<QueryDocumentSnapshot<Map<String, dynamic>>>)
+          snapshot as List<QueryDocumentSnapshot<Map<String, dynamic>>>)
               .toList();
 
-          _processChatUpdates(allMessages, allMessages, userId, marketId!);
+          if (marketId != null) {
+            _processChatUpdates(allMessages, allMessages, userId, marketId);
+          } else {
+            _processChatUpdates(allMessages, [], userId, userId); // marketId가 없는 경우 처리
+          }
         });
       });
     } catch (error) {
@@ -131,14 +151,25 @@ class _ChatListState extends State<ChatList> {
 
       if (userDoc.exists) {
         final data = userDoc.data();
-        final marketId = data?['marketId'] as String?;
-        return marketId;
+
+        // marketId가 존재하는지와 null 여부를 안전하게 처리
+        if (data != null && data.containsKey('marketId')) {
+          final marketId = data['marketId'];
+          if (marketId is String && marketId.isNotEmpty) {
+            return marketId;
+          } else {
+            print('marketId is null or not a valid String');
+          }
+        } else {
+          print('marketId field does not exist for user $userId');
+        }
+      } else {
+        print('User document does not exist for user $userId');
       }
     } catch (e) {
       print('Error fetching market ID: $e');
     }
-
-    return null;
+    return null; // marketId가 없을 경우 안전하게 null 반환
   }
 
   Future<Map<String, String>> _getOrFetchUserData(String userId) async {
@@ -276,7 +307,7 @@ class _ChatListState extends State<ChatList> {
 
       Map<String, ChatModel> recentChatsMap = {};
       for (var chat in allChats) {
-        if (chat.sendId == marketId && chat.receiveId == marketId) {
+        if (marketId != null && chat.sendId == marketId && chat.receiveId == marketId) {
           continue;
         }
 
@@ -367,6 +398,7 @@ class _ChatListState extends State<ChatList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('채팅', style: TextStyle(fontFamily: 'NanumSquare',),),
       ),
       body: StreamBuilder<List<ChatModel>>(

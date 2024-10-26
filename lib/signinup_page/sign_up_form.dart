@@ -123,7 +123,7 @@ class _SignUpFormState extends State<SignUpForm> {
           child: ListView(
             children: <Widget>[
               SizedBox(height: 16),
-              Image.asset('assets/images/ecore_logo.png'),
+              Image.asset('assets/images/logo.png'),
               TextFormField(
                 controller: _emailController,
                 cursorColor: Colors.black54,
@@ -204,10 +204,26 @@ class _SignUpFormState extends State<SignUpForm> {
           children: [
             Text('이미 계정이 있으신가요? '),
             GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => SignInForm()),
-                );
+              onTap: () async {
+                // 현재 사용자 삭제
+                User? user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  try {
+                    await user.delete();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('회원 가입을 취소하였습니다.')),
+                    );
+                    // 로그인 화면으로 이동
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => SignInForm()),
+                    );
+                  } catch (e) {
+                    print('Error deleting user: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('회원가입 취소에 실패했습니다.')),
+                    );
+                  }
+                }
               },
               child: Text(
                 '로그인하기',

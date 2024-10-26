@@ -146,21 +146,18 @@ class _FeedDetailState extends State<FeedDetail> {
 
   Future<List<String>> getDonaListImage() async {
     try {
-      final QuerySnapshot sellPostSnapshot = await FirebaseFirestore.instance
-          .collection('SellPosts')
-          .where('sellId', isEqualTo: widget.sellPost.sellId)
-          .get();
+      final String documentId = widget.sellPost.sellId;
 
-      if (sellPostSnapshot.docs.isEmpty) {
-        return [];
-      }
-
-      final String documentId = sellPostSnapshot.docs.first.id;
       final QuerySnapshot donaListSnapshot = await FirebaseFirestore.instance
           .collection('SellPosts')
           .doc(documentId)
           .collection('DonaList')
           .get();
+
+      if (donaListSnapshot.docs.isEmpty) {
+        print('DonaList에 데이터가 없습니다.');
+        return [];
+      }
 
       List<String> donaImages = donaListSnapshot.docs
           .map((doc) => doc['donaImg'][0] as String)
@@ -168,7 +165,7 @@ class _FeedDetailState extends State<FeedDetail> {
 
       return donaImages;
     } catch (e) {
-      print('Error fetching dona images: $e');
+      print('이미지 가져오는 중 오류 발생: $e');
       return [];
     }
   }

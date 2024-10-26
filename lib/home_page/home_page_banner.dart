@@ -69,10 +69,10 @@ class _TitleBannerState extends State<TitleBanner> {
         title: Row(
           children: [
             Image.asset(
-              'assets/images/ecore_logo.png', // 로고 이미지 경로
-              height: 40, // 로고의 높이를 설정 (필요에 따라 크기 조정)
+              'assets/images/logo.png',
+              height: 40,
             ),
-            Spacer(), // 텍스트와 검색 아이콘 사이의 공간 확보
+            Spacer(),
             IconButton(
               onPressed: () {
                 Navigator.push(
@@ -91,49 +91,52 @@ class _TitleBannerState extends State<TitleBanner> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 20),
-              child: Center(child: CareouselSlider()),
-            ),
-            HorizontalListSection(
-              stream: businessSellPostsStream(), // Stream 설정
-              title: '믿고 거래하는 에코리 상품',
-              onMorePressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BusinessMarketPost(), // 실제 페이지로 변경
-                  ),
-                );
-              },
-            ),
-            HorizontalListSection(
-              stream: userModel.recentlyViewedStream,
-              title: '최근 본 상품',
-              onMorePressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecentViewedPage(),
-                  ),
-                );
-              },
-            ),
-            HorizontalListSection(
-              stream: userModel.favoriteListStream,
-              title: '찜한 상품',
-              onMorePressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FavoriteListPage(), // 실제 페이지로 변경
-                  ),
-                );
-              },
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 20),
+                child: Center(child: CareouselSlider()),
+              ),
+              HorizontalListSection(
+                stream: businessSellPostsStream(), // Stream 설정
+                title: '믿고 거래하는 에코리 상품',
+                onMorePressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BusinessMarketPost(), // 실제 페이지로 변경
+                    ),
+                  );
+                },
+              ),
+              HorizontalListSection(
+                stream: userModel.recentlyViewedStream,
+                title: '최근 본 상품',
+                onMorePressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecentViewedPage(),
+                    ),
+                  );
+                },
+              ),
+              HorizontalListSection(
+                stream: userModel.favoriteListStream,
+                title: '찜한 상품',
+                onMorePressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FavoriteListPage(), // 실제 페이지로 변경
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
