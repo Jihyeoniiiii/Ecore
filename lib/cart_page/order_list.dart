@@ -238,7 +238,7 @@ class _OrderListState extends State<OrderList> {
                             itemIndex: itemIndex,
                             itemTitle: item['title'] ?? '제목 없음',
                             itemImg: imageList.isNotEmpty ? imageList[0] : '',
-                            itemPrice: item['price'] ?? 0,
+                            itemPrice: (item['price'] as num?)?.toInt() ?? 0,
                             marketId: item['marketId'] ?? '',
                           ),
                         ),

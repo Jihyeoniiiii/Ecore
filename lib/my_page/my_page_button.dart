@@ -105,13 +105,14 @@ class _MyPageBtnState extends State<MyPageBtn> {
               child: Text('생성'),
               onPressed: () {
                 Navigator.of(context).pop(); // 팝업 닫기
-                Navigator.of(context).pushReplacement(
+                Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => SellerInfoForm(), // 마켓 생성 화면으로 이동
                   ),
                 );
               },
             ),
+
           ],
         );
       },

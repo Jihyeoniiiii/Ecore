@@ -86,6 +86,7 @@ class _PayPageState extends State<PayPage> {
     }
   }
 
+
   Future<void> _fetchDefaultAddress() async {
     if (user != null) {
       try {
@@ -172,36 +173,45 @@ class _PayPageState extends State<PayPage> {
       for (var item in widget.cartItems) {
         // 구매자의 marketId 가져오기
         final buyerDoc = await FirebaseFirestore.instance.collection('Users').doc(user!.uid).get();
-        buyerMarketId = buyerDoc['marketId']; // 구매자의 marketId
+        buyerMarketId = buyerDoc['marketId'] ?? ''; // null 처리
+        if (buyerMarketId.isEmpty) {
+          throw Exception('Buyer marketId not found');
+        }
 
         // 기부글 구매 시 DonaOrders에 추가
         if (item['donaId'] != null) {
-          print("donaId: " + item['donaId']);
-          // 기부글 정보를 가져오기 위해 DonaPosts에서 userId를 가져옵니다.
-          final donaPostRef = FirebaseFirestore.instance.collection('DonaPosts').doc(item['donaId']);
-          final donaPostDoc = await donaPostRef.get();
-          isDonaOrderId = true;
 
-          if (donaPostDoc.exists) {
-            final String donorUserId = donaPostDoc['userId']; // 기부자의 userId
+          try {
+            // 도네이션 포스트 조회
+            final donaPostRef = FirebaseFirestore.instance.collection('DonaPosts').doc(item['donaId']);
+            final donaPostDoc = await donaPostRef.get();
 
-            // 기부자의 username을 가져오기 위해 Users 컬렉션 조회
-            final donorDoc = await FirebaseFirestore.instance.collection('Users').doc(donorUserId).get();
+            if (!donaPostDoc.exists) {
+              print("Error: DonaPost does not exist.");
+              return; // 포스트가 없으면 함수 종료
+            }
 
-            if (donorDoc.exists) {
-              final String donorUsername = donorDoc['username'] ?? 'Unknown'; // 기부자의 username
-              print("donorUsername: " + donorUsername); // 기부자의 username 출력
+            final String donorUserId = donaPostDoc['userId'];
 
-              // 구매자의 marketId가 비어있지 않은 경우에만 DonaOrders에 추가
+            try {
+              // 기부자 정보 조회
+              final donorDoc = await FirebaseFirestore.instance.collection('Users').doc(donorUserId).get();
+              if (!donorDoc.exists) {
+                print("DonaPost data: ${donaPostDoc.data()}");
+                return;
+              }
+
+              final String donorUsername = donorDoc['username'] ?? 'Unknown';
+
               if (buyerMarketId.isNotEmpty) {
                 final donaOrderRef = FirebaseFirestore.instance
                     .collection('Markets')
-                    .doc(buyerMarketId) // 구매자의 marketId
+                    .doc(buyerMarketId)
                     .collection('DonaOrders');
 
                 await donaOrderRef.add({
-                  'userId': donorUserId, // 기부자의 userId
-                  'username': donorUsername, // 기부자의 username
+                  'userId': donorUserId,
+                  'username': donorUsername,
                   'donaId': item['donaId'],
                   'title': item['title'],
                   'price': item['price'],
@@ -210,23 +220,27 @@ class _PayPageState extends State<PayPage> {
                   'donaImg': item['img'],
                 });
 
-                // 기부자에게 포인트 추가
                 int donationPoints = item['point'];
                 await FirebaseFirestore.instance.collection('Users').doc(donorUserId).update({
                   'points': FieldValue.increment(donationPoints), // 기부자에게 포인트 추가
                 });
 
-                // 사용자 서브컬렉션에 포인트 기록 저장
-                await FirebaseFirestore.instance.collection('Users').doc(donorUserId).collection('PointHistory').add({
+                await FirebaseFirestore.instance.collection('Users').doc(donorUserId)
+                    .collection('PointHistory').add({
                   'point': donationPoints,
                   'timestamp': FieldValue.serverTimestamp(),
-                  'name' : '기부글',
-                  'type': 'earn' // 적립이라는 것을 구분하기 위한 필드
+                  'name': '기부글',
+                  'type': 'earn',
                 });
               }
+            } catch (e) {
+              print("Error fetching donor document: $e");
             }
+          } catch (e) {
+            print("Error fetching donaPost document: $e");
           }
         }
+
 
         // 판매글 구매 시
         if (item['sellId'] != null && buyerMarketId.isNotEmpty) {
@@ -768,8 +782,11 @@ class _PayPageState extends State<PayPage> {
                   height: 30,
                   child: TextField(
                     controller: _pointController, // 포인트 입력 필드 컨트롤러
+                    textAlign: TextAlign.left,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 8), // 세로 중앙에 위치하도록 패딩 설정
+
                     ),
                   ),
                 ),
