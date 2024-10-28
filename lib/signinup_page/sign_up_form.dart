@@ -18,6 +18,12 @@ class _SignUpFormState extends State<SignUpForm> {
   bool _isEmailSent = false;
   bool _isEmailVerified = false;
 
+  // 동의 체크 상태 추가
+  bool _isAllChecked = false;
+  bool _isPrivacyPolicyChecked = false;
+  bool _isThirdPartyInfoChecked = false;
+  bool _isPointTermsChecked = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -29,17 +35,14 @@ class _SignUpFormState extends State<SignUpForm> {
 
   Future<void> _sendVerificationEmail() async {
     try {
-      // Create a new user with email and password
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _pwController.text,
       );
 
-      // Get the newly created user
       User? user = userCredential.user;
 
       if (user != null) {
-        // Send email verification
         await user.sendEmailVerification();
         if (mounted) {
           setState(() {
@@ -63,7 +66,6 @@ class _SignUpFormState extends State<SignUpForm> {
   Future<void> _completeSignUp() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        // Sign in the user
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _pwController.text,
@@ -72,12 +74,10 @@ class _SignUpFormState extends State<SignUpForm> {
         User? user = userCredential.user;
 
         if (user != null) {
-          // 이메일 인증 상태를 최신으로 갱신
           await user.reload();
           user = FirebaseAuth.instance.currentUser;
 
           if (user!.emailVerified) {
-            // 이메일 인증이 완료된 경우 Firestore에 사용자 정보 저장
             await _saveUserToFirestore(user);
 
             if (mounted) {
@@ -86,7 +86,6 @@ class _SignUpFormState extends State<SignUpForm> {
               );
             }
 
-            // 로그인 화면으로 이동
             if (mounted) {
               Navigator.pushReplacement(
                 context,
@@ -112,10 +111,8 @@ class _SignUpFormState extends State<SignUpForm> {
     }
   }
 
-
   Future<void> _saveUserToFirestore(User user) async {
     try {
-      // 이메일에서 username 추출
       String username = user.email!.split('@').first;
 
       await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
@@ -128,7 +125,6 @@ class _SignUpFormState extends State<SignUpForm> {
       print('Error saving user to Firestore: $e');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -197,13 +193,71 @@ class _SignUpFormState extends State<SignUpForm> {
                 },
               ),
               SizedBox(height: 16),
+
+              // 동의 항목 추가
+              CheckboxListTile(
+                dense: true, // 간격을 줄이기 위해 dense 모드 활성화
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text('전체 동의'),
+                value: _isAllChecked,
+                onChanged: (value) {
+                  setState(() {
+                    _isAllChecked = value!;
+                    _isPrivacyPolicyChecked = value;
+                    _isThirdPartyInfoChecked = value;
+                    _isPointTermsChecked = value;
+                  });
+                },
+              ),
+              Divider(height: 8), // 간격을 줄이려면 height 값을 줄입니다.
+              CheckboxListTile(
+                dense: true,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text('(필수) 개인정보 처리방침 동의'),
+                value: _isPrivacyPolicyChecked,
+                onChanged: (value) {
+                  setState(() {
+                    _isPrivacyPolicyChecked = value!;
+                    _updateAllCheckedStatus();
+                  });
+                },
+              ),
+              CheckboxListTile(
+                dense: true,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text('(필수) 개인정보 제3자 제공 동의'),
+                value: _isThirdPartyInfoChecked,
+                onChanged: (value) {
+                  setState(() {
+                    _isThirdPartyInfoChecked = value!;
+                    _updateAllCheckedStatus();
+                  });
+                },
+              ),
+              CheckboxListTile(
+                dense: true,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text('(필수) 포인트 약관 동의'),
+                value: _isPointTermsChecked,
+                onChanged: (value) {
+                  setState(() {
+                    _isPointTermsChecked = value!;
+                    _updateAllCheckedStatus();
+                  });
+                },
+              ),
+
+
+              SizedBox(height: 16),
               if (!_isEmailSent) ...[
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: (_formKey.currentState?.validate() ?? false) && _isAllChecked
+                      ? () {
                     if (_formKey.currentState?.validate() ?? false) {
                       _sendVerificationEmail();
                     }
-                  },
+                  }
+                      : null,
                   child: Text('인증 이메일 전송'),
                 ),
               ] else if (_isEmailSent && !_isEmailVerified) ...[
@@ -224,7 +278,6 @@ class _SignUpFormState extends State<SignUpForm> {
             Text('이미 계정이 있으신가요? '),
             GestureDetector(
               onTap: () async {
-                // 현재 사용자 삭제
                 User? user = FirebaseAuth.instance.currentUser;
                 if (user != null) {
                   try {
@@ -232,7 +285,6 @@ class _SignUpFormState extends State<SignUpForm> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('회원 가입을 취소하였습니다.')),
                     );
-                    // 로그인 화면으로 이동
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => SignInForm()),
                     );
@@ -256,6 +308,13 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
       ),
     );
+  }
+
+  // 전체 동의 상태 업데이트
+  void _updateAllCheckedStatus() {
+    setState(() {
+      _isAllChecked = _isPrivacyPolicyChecked && _isThirdPartyInfoChecked && _isPointTermsChecked;
+    });
   }
 
   InputDecoration textInputDecor(String hint) {
