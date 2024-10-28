@@ -66,13 +66,12 @@ class _SellerInfoFormState extends State<SellerInfoForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text('판매자 정보 입력', style: TextStyle(fontFamily: 'NanumSquare',)),
+        centerTitle: true, // 앱바 제목 중앙 배치
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => MyPageBanner()),
-              );
-            }
+          onPressed: () {
+            Navigator.pop(context); // 뒤로가기 버튼 클릭 시 현재 페이지 닫기
+          },
         ),
       ),
       body: SingleChildScrollView(
