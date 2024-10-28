@@ -41,18 +41,22 @@ class _SignUpFormState extends State<SignUpForm> {
       if (user != null) {
         // Send email verification
         await user.sendEmailVerification();
-        setState(() {
-          _isEmailSent = true;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('이메일 인증을 전송했습니다. 이메일을 확인해 주세요.')),
-        );
+        if (mounted) {
+          setState(() {
+            _isEmailSent = true;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('이메일 인증을 전송했습니다. 이메일을 확인해 주세요.')),
+          );
+        }
       }
     } catch (e) {
       print('Error sending verification email: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('이메일 인증을 보낼 수 없습니다.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('이메일 인증을 보낼 수 없습니다.')),
+        );
+      }
     }
   }
 
@@ -66,33 +70,48 @@ class _SignUpFormState extends State<SignUpForm> {
         );
 
         User? user = userCredential.user;
-        if (user != null && user.emailVerified) {
-          // 이메일 인증 확인 후 Firestore에 사용자 정보 저장
-          await _saveUserToFirestore(user);
 
-          // Finalize sign up process
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('회원가입이 완료되었습니다.')),
-          );
+        if (user != null) {
+          // 이메일 인증 상태를 최신으로 갱신
+          await user.reload();
+          user = FirebaseAuth.instance.currentUser;
 
-          // Navigate to the sign-in page
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => SignInForm()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('이메일 인증이 필요합니다.')),
-          );
+          if (user!.emailVerified) {
+            // 이메일 인증이 완료된 경우 Firestore에 사용자 정보 저장
+            await _saveUserToFirestore(user);
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('회원가입이 완료되었습니다.')),
+              );
+            }
+
+            // 로그인 화면으로 이동
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SignInForm()),
+              );
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('이메일 인증이 필요합니다.')),
+              );
+            }
+          }
         }
       } catch (e) {
         print('Error completing sign up: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('회원가입 완료에 실패했습니다.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('회원가입 완료에 실패했습니다.')),
+          );
+        }
       }
     }
   }
+
 
   Future<void> _saveUserToFirestore(User user) async {
     try {

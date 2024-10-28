@@ -16,6 +16,7 @@ class DonaProductForm extends StatefulWidget {
 
 class _DonaProductFormState extends State<DonaProductForm> {
   final _formKey = GlobalKey<FormState>();
+  XFile? _aiImage; // Single image for AI processing
   List<XFile>? _images = []; // 여러 이미지를 저장할 리스트
   final picker = ImagePicker();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -30,8 +31,18 @@ class _DonaProductFormState extends State<DonaProductForm> {
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _pointController = TextEditingController(); // 포인트 입력 필드
   String? _categoryValue;
+  XFile? _singleImage;
+  int? _points;
   String? _selectedCondition = 'S';
-  String _serverUrl = 'http://1.235.3.54:5000/upload';
+  String? _condition = ''; // AI-processed condition display
+  String _serverUrl = 'http://192.168.0.5:8088/upload';
+
+  Future<void> getSingleImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _singleImage = pickedFile;
+    });
+  }
 
   Future<void> getImages() async {
     if (_images!.length >= 10) {
@@ -41,12 +52,64 @@ class _DonaProductFormState extends State<DonaProductForm> {
       return; // 이미 10개 이상의 이미지가 선택된 경우 추가 선택 불가
     }
 
+    // AI image picker and uploader
+    Future<void> pickAiImage() async {
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      setState(() {
+        _aiImage = pickedFile;
+      });
+    }
+
     final pickedFiles = await picker.pickMultiImage();
     if (pickedFiles != null) {
       setState(() {
         // 최대 10개를 초과하지 않도록 리스트에 추가
         _images = (_images! + pickedFiles).take(10).toList();
       });
+    }
+  }
+
+  Future<void> uploadSingleImage() async {
+    if (_singleImage == null) return;
+
+    try {
+      var uri = Uri.parse(_serverUrl);
+      var request = http.MultipartRequest('POST', uri);
+      request.files.add(await http.MultipartFile.fromPath(
+        'file',
+        _singleImage!.path,
+        filename: path.basename(_singleImage!.path),
+      ));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseData = await http.Response.fromStream(response);
+        var result = jsonDecode(responseData.body);
+
+        setState(() {
+          _points = result['points'];
+          print(result['image_url']);
+
+          _condition = _evaluateCondition(_points!); // 포인트에 따른 상태 설정
+        });
+      } else {
+        print('이미지 업로드 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('이미지 업로드 중 오류 발생: $e');
+    }
+  }
+
+  String _evaluateCondition(int points) {
+    if (points >= 80) {
+      return 'S';
+    } else if (points >= 60) {
+      return 'A';
+    } else if (points >= 40) {
+      return 'B';
+    } else {
+      return 'C';
     }
   }
 
@@ -127,18 +190,18 @@ class _DonaProductFormState extends State<DonaProductForm> {
         List<String> imageUrls = [];
         List<Map<String, dynamic>> results = [];  // 이미지 처리 결과 저장
 
-        if (_images != null && _images!.isNotEmpty) {
-          // 이미지를 Flask 서버로 업로드하고 면적/등급 정보 받기
-          for (XFile image in _images!) {
-            Map<String, dynamic>? result = await uploadImageToFlask(image); // Flask 서버에 이미지 업로드
-            if (result != null) {
-              imageUrls.add(result['image_url']);  // 이미지를 서버에 업로드하고 URL 받기
-              // results.add({'area': result['area'], 'grade': result['grade']});  // 처리 결과 받기
-            } else {
-              throw Exception('Image upload failed');
-            }
-          }
-        }
+        // if (_images != null && _images!.isNotEmpty) {
+        //   // 이미지를 Flask 서버로 업로드하고 면적/등급 정보 받기
+        //   for (XFile image in _images!) {
+        //     Map<String, dynamic>? result = await uploadImageToFlask(image); // Flask 서버에 이미지 업로드
+        //     if (result != null) {
+        //       imageUrls.add(result['image_url']);  // 이미지를 서버에 업로드하고 URL 받기
+        //       // results.add({'area': result['area'], 'grade': result['grade']});  // 처리 결과 받기
+        //     } else {
+        //       throw Exception('Image upload failed');
+        //     }
+        //   }
+        // }
 
         // Firestore에 상품 정보와 함께 이미지 URL 및 결과값(면적, 등급) 저장
         DocumentReference docRef = await _firestore.collection('DonaPosts').add({
@@ -220,6 +283,42 @@ class _DonaProductFormState extends State<DonaProductForm> {
           key: _formKey,
           child: ListView(
             children: <Widget>[
+              // AI image section
+              Row(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: getSingleImage,
+                    child: Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: _singleImage == null
+                          ? Icon(Icons.camera_alt, size: 50)
+                          : Image.file(File(_singleImage!.path), fit: BoxFit.cover),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: uploadSingleImage,
+                    child: Text('포인트 측정하기'),
+                  ),
+                ],
+              ),
+              if (_points != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 16),
+                    Text('포인트: $_points'),
+                    Text('물품 상태: $_condition'),
+                  ],
+                ),
+              SizedBox(height: 16),
+
+              // Post image section (keep as is)
               Row(
                 children: <Widget>[
                   GestureDetector(
