@@ -195,57 +195,117 @@ class _SignUpFormState extends State<SignUpForm> {
               SizedBox(height: 16),
 
               // 동의 항목 추가
-              CheckboxListTile(
-                dense: true, // 간격을 줄이기 위해 dense 모드 활성화
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text('전체 동의'),
-                value: _isAllChecked,
-                onChanged: (value) {
-                  setState(() {
-                    _isAllChecked = value!;
-                    _isPrivacyPolicyChecked = value;
-                    _isThirdPartyInfoChecked = value;
-                    _isPointTermsChecked = value;
-                  });
-                },
+              Row(
+                children: [
+                  Transform.scale(
+                    scale: 1.0, // 전체 동의 체크박스 크기를 키움
+                    child: Checkbox(
+                      value: _isAllChecked,
+                      onChanged: (value) {
+                        setState(() {
+                          _isAllChecked = value!;
+                          _isPrivacyPolicyChecked = value;
+                          _isThirdPartyInfoChecked = value;
+                          _isPointTermsChecked = value;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8), // 체크박스와 텍스트 사이에 간격 추가
+                  Expanded(
+                    child: Text(
+                      '전체 동의',
+                      style: TextStyle(
+                        fontSize: 18, // 글씨 크기 조정
+                        fontWeight: FontWeight.bold, // 글씨를 굵게
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Divider(height: 8), // 간격을 줄이려면 height 값을 줄입니다.
-              CheckboxListTile(
-                dense: true,
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text('(필수) 개인정보 처리방침 동의'),
-                value: _isPrivacyPolicyChecked,
-                onChanged: (value) {
-                  setState(() {
-                    _isPrivacyPolicyChecked = value!;
-                    _updateAllCheckedStatus();
-                  });
-                },
+              Divider(height: 8),
+              Row(
+                children: [
+                  Transform.scale(
+                    scale: 0.8, // 체크박스 크기 조정
+                    child: Checkbox(
+                      value: _isPrivacyPolicyChecked,
+                      onChanged: (value) {
+                        setState(() {
+                          _isPrivacyPolicyChecked = value!;
+                          _updateAllCheckedStatus();
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8), // 체크박스와 텍스트 사이에 간격 추가
+                  Expanded(
+                    child: Text('(필수) 개인정보 처리방침 동의'),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.arrow_forward_ios, size: 16), // 화살표 아이콘 추가
+                    onPressed: () {
+                      // 클릭 시 원하는 동작 추가
+                      print('Navigate to privacy policy details');
+                    },
+                  ),
+                ],
               ),
-              CheckboxListTile(
-                dense: true,
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text('(필수) 개인정보 제3자 제공 동의'),
-                value: _isThirdPartyInfoChecked,
-                onChanged: (value) {
-                  setState(() {
-                    _isThirdPartyInfoChecked = value!;
-                    _updateAllCheckedStatus();
-                  });
-                },
+              Row(
+                children: [
+                  Transform.scale(
+                    scale: 0.8, // 체크박스 크기 조정
+                    child: Checkbox(
+                      value: _isThirdPartyInfoChecked,
+                      onChanged: (value) {
+                        setState(() {
+                          _isThirdPartyInfoChecked = value!;
+                          _updateAllCheckedStatus();
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8), // 체크박스와 텍스트 사이에 간격 추가
+                  Expanded(
+                    child: Text('(필수) 개인정보 제3자 제공 동의'),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.arrow_forward_ios, size: 16), // 화살표 아이콘 추가
+                    onPressed: () {
+                      // 클릭 시 원하는 동작 추가
+                      print('Navigate to privacy policy details');
+                    },
+                  ),
+                ],
               ),
-              CheckboxListTile(
-                dense: true,
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text('(필수) 포인트 약관 동의'),
-                value: _isPointTermsChecked,
-                onChanged: (value) {
-                  setState(() {
-                    _isPointTermsChecked = value!;
-                    _updateAllCheckedStatus();
-                  });
-                },
+              Row(
+                children: [
+                  Transform.scale(
+                    scale: 0.8, // 체크박스 크기 조정
+                    child: Checkbox(
+                      value: _isPointTermsChecked,
+                      onChanged: (value) {
+                        setState(() {
+                          _isPointTermsChecked = value!;
+                          _updateAllCheckedStatus();
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8), // 체크박스와 텍스트 사이에 간격 추가
+                  Expanded(
+                    child: Text('(필수) 포인트 약관 동의'),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.arrow_forward_ios, size: 16), // 화살표 아이콘 추가
+                    onPressed: () {
+                      // 클릭 시 원하는 동작 추가
+                      print('Navigate to privacy policy details');
+                    },
+                  ),
+                ],
               ),
+
 
 
               SizedBox(height: 16),
