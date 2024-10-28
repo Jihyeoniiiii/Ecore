@@ -79,15 +79,14 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
   }
 
   Future<void> _submitMarketInfo() async {
-    // 로딩 중 다이얼로그 표시
-    _showLoadingDialog();
-
     if (_formKey.currentState?.validate() ?? false) {
+      // 로딩 중 다이얼로그 표시
+      _showLoadingDialog();
+
       String marketName = _marketNameController.text;
       List<String> marketDescription = _marketDescriptionController.text.split('\n');
       String csPhone = _csPhoneController.text;
       String csemail = _csemailController.text;
-
       String? userId = FirebaseAuth.instance.currentUser?.uid;
 
       try {
@@ -96,7 +95,7 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
           'feedPosts': marketDescription,
           'cs_phone': csPhone,
           'cs_email': csemail,
-          'business_number': _businessNumber ?? '', // 사업자 번호 추가
+          'business_number': _businessNumber ?? '',
           'userId': userId,
           'seller_name': widget.seller_name,
           'dob': widget.dob,
@@ -112,11 +111,7 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
 
         if (_image != null) {
           await _uploadImage(marketId);
-
-          await FirebaseFirestore.instance
-              .collection('Markets')
-              .doc(marketId)
-              .update({
+          await FirebaseFirestore.instance.collection('Markets').doc(marketId).update({
             'img': _profileImageUrl,
           });
         }
@@ -127,35 +122,34 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
           });
         }
 
-        DocumentSnapshot marketDoc = await FirebaseFirestore.instance
-            .collection('Markets')
-            .doc(marketId)
-            .get();
+        DocumentSnapshot marketDoc = await FirebaseFirestore.instance.collection('Markets').doc(marketId).get();
         MarketModel market = MarketModel.fromSnapshot(marketDoc);
 
-        // 로딩 중 다이얼로그 닫기
-        Navigator.of(context).pop();
+        // 다이얼로그 닫기
+        if (mounted) Navigator.of(context).pop();
 
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => MyMarketBanner(market: market)),
               (route) => false,
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('마켓 정보가 제출되었습니다.')),
         );
-      } catch (e) {
-        // 로딩 중 다이얼로그 닫기
-        Navigator.of(context).pop();
 
+      } catch (e) {
+        // 에러 발생 시 다이얼로그 닫기
+        if (mounted) Navigator.of(context).pop();
         print(e);
       }
     } else {
-      // 폼이 유효하지 않을 때 로딩 중 다이얼로그 닫기
-      Navigator.of(context).pop();
+      // 폼이 유효하지 않을 때 다이얼로그가 열려 있으면 닫기
+      if (mounted) Navigator.of(context).pop();
     }
   }
+
+
 
   void _showLoadingDialog() {
     showDialog(

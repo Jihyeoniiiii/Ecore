@@ -60,10 +60,6 @@ class _TitleBannerState extends State<TitleBanner> {
     });
   }
 
-  void _signOut() async {
-    await Provider.of<FirebaseAuthState>(context, listen: false).signOut();
-  }
-
   @override
   Widget build(BuildContext context) {
     final userModel = Provider.of<UserModel>(context);
@@ -73,7 +69,7 @@ class _TitleBannerState extends State<TitleBanner> {
         title: Row(
           children: [
             Image.asset(
-              'assets/images/ecore_logo.png', // 로고 이미지 경로
+              'assets/images/logo.png', // 로고 이미지 경로
               height: 40, // 로고의 높이를 설정 (필요에 따라 크기 조정)
             ),
             Spacer(), // 텍스트와 검색 아이콘 사이의 공간 확보
@@ -89,13 +85,6 @@ class _TitleBannerState extends State<TitleBanner> {
               icon: Icon(
                 CupertinoIcons.search,
                 color: Colors.blue[900],
-              ),
-            ),
-            IconButton(
-              onPressed: _signOut, // 로그아웃 메서드 호출
-              icon: Icon(
-                Icons.logout,
-                color: Colors.red, // 로그아웃 아이콘 색상
               ),
             ),
           ],

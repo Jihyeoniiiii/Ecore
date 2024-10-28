@@ -167,7 +167,7 @@ class _MyPageListState extends State<MyPageList> {
                 Text('주소 경기도 수원시 영통구 이의동 광교산로 154-42', style: TextStyle(fontSize: 10)),
                 Text('문의전화 010-8691-5007', style: TextStyle(fontSize: 10)),
                 Text('이메일 kkuriyoon5007@gmail.com', style: TextStyle(fontSize: 10)),
-                Text('사업자등록번호 020-21-11614', style: TextStyle(fontSize: 10)),
+                Text('사업자등록번호 455-66-00754', style: TextStyle(fontSize: 10)),
                 Text('통신판매업 신고번호 2020-수원광교-2024호', style: TextStyle(fontSize: 10)),
                 Text('Hosting by (주)Carelink', style: TextStyle(fontSize: 10)),
                 Divider(thickness: 2),
