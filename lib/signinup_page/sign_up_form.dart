@@ -1,3 +1,4 @@
+import 'package:ecore/signinup_page/terms.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../signinup_page/sign_in_form.dart';
@@ -7,6 +8,11 @@ class SignUpForm extends StatefulWidget {
   @override
   _SignUpFormState createState() => _SignUpFormState();
 }
+//
+// const String privacyPolicyContent = '개인정보 처리방침 내용...'; // 여기에 개인정보 처리방침 내용을 입력하세요.
+// const String thirdPartyInfoContent = '제3자 제공 동의 내용...'; // 여기에 제3자 제공 동의 내용을 입력하세요.
+// const String pointTermsContent = '포인트 약관 내용...'; // 여기에 포인트 약관 내용을 입력하세요.
+
 
 class _SignUpFormState extends State<SignUpForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -14,6 +20,7 @@ class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _pwController = TextEditingController();
   final TextEditingController _cpwController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+
 
   bool _isEmailSent = false;
   bool _isEmailVerified = false;
@@ -245,8 +252,15 @@ class _SignUpFormState extends State<SignUpForm> {
                   IconButton(
                     icon: Icon(Icons.arrow_forward_ios, size: 16), // 화살표 아이콘 추가
                     onPressed: () {
-                      // 클릭 시 원하는 동작 추가
-                      print('Navigate to privacy policy details');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TermsDetailPage(
+                            title: '개인정보 처리방침',
+                            // content: privacyPolicyContent, // 개인정보 처리방침 내용
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -272,8 +286,15 @@ class _SignUpFormState extends State<SignUpForm> {
                   IconButton(
                     icon: Icon(Icons.arrow_forward_ios, size: 16), // 화살표 아이콘 추가
                     onPressed: () {
-                      // 클릭 시 원하는 동작 추가
-                      print('Navigate to privacy policy details');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TermsDetailPage(
+                            title: '개인정보 제3자 정보 제공 동의',
+                            // content: thirdPartyInfoContent, // 제3자 제공 동의 내용
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -299,8 +320,15 @@ class _SignUpFormState extends State<SignUpForm> {
                   IconButton(
                     icon: Icon(Icons.arrow_forward_ios, size: 16), // 화살표 아이콘 추가
                     onPressed: () {
-                      // 클릭 시 원하는 동작 추가
-                      print('Navigate to privacy policy details');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TermsDetailPage(
+                            title: '포인트 약관',
+                            // content: pointTermsContent, // 포인트 약관 내용
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ],
