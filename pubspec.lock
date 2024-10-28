@@ -245,10 +245,10 @@ packages:
     dependency: "direct dev"
     description:
       name: firebase_storage
-      sha256: e00e2909e36f5e44f839fd77dff90ff764f7bb303ed548d43617014ce05c77c8
+      sha256: "04da94a710b0c08666de7dfa19812c9b5d404ea080a7a9d402ecb80705754122"
       url: "https://pub.dev"
     source: hosted
-    version: "12.3.3"
+    version: "12.3.4"
   firebase_storage_platform_interface:
     dependency: transitive
     description:
@@ -294,6 +294,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_pdfview:
+    dependency: "direct dev"
+    description:
+      name: flutter_pdfview
+      sha256: "715085f9f2c1ad5129dfe0d31a5f0e5481e2e296ce4e6ce72662de28df5456a6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.4"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -396,10 +404,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker_android
-      sha256: d34e0d9e024e81321b2aeed7b202ec6181cc282e6a1c0c0b4e6ad07ef1065d82
+      sha256: "8faba09ba361d4b246dc0a17cb4289b3324c2b9f6db7b3d457ee69106a86bd32"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.12+16"
+    version: "0.8.12+17"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -809,10 +817,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: "5c5f338a667b4c644744b661f309fb8080bb94b18a7e91ef1dbd343bed00ed6d"
+      sha256: f652077d0bdf60abe4c1f6377448e8655008eef28f128bc023f7b5e8dfeb48fc
       url: "https://pub.dev"
     source: hosted
-    version: "14.2.5"
+    version: "14.2.4"
   web:
     dependency: transitive
     description:
