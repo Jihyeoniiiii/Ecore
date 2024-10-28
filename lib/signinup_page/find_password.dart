@@ -1,3 +1,4 @@
+import 'package:ecore/cosntants/common_color.dart';
 import 'package:ecore/signinup_page/sign_up_form.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +92,7 @@ class _FindPasswordScreenState extends State<FindPasswordScreen> {
               height: heightRatio * 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[50], // 배경색 설정
+                  backgroundColor: baseColor, // 배경색 설정
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0), // 원하는 값으로 조절
                   ),
