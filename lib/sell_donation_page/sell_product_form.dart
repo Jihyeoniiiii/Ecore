@@ -125,6 +125,14 @@ class _SellProductFormState extends State<SellProductForm> {
             await sellPostRef.collection('DonaList').add(donaOrder);
           }
 
+          // Add sellPostRef ID to the sellPosts array in the Markets collection if not already present
+          final sellPostId = sellPostRef.id;
+          DocumentReference marketRef = _firestore.collection('Markets').doc(marketDocumentId);
+
+          await marketRef.update({
+            'sellPosts': FieldValue.arrayUnion([sellPostId])
+          });
+
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('판매 상품이 등록되었습니다.')));
           Navigator.pop(context);
@@ -138,6 +146,7 @@ class _SellProductFormState extends State<SellProductForm> {
       }
     }
   }
+
 
   void _showLoadingDialog() {
     showDialog(

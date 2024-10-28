@@ -11,7 +11,6 @@ const KEY_PHONE = 'phone';
 const KEY_EMAIL = 'email';
 const KEY_NAME = 'username';
 const KEY_PROFILEIMG = 'profile_img';
-const KEY_POINT = 'point';
 const KEY_MYDONAPOST = 'my_dona_post';
 const KEY_CART = 'cart'; // 장바구니 배열 값
 const KEY_USER_MARKETID = 'marketId';

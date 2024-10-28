@@ -7,6 +7,7 @@ import '../models/firestore/market_model.dart'; // MarketModel import
 import '../my_page/favorite_list_page.dart';
 import '../my_page/recently_viewed_page.dart';
 import '../search/search_screen.dart';
+import '../widgets/business_information.dart';
 import 'business_market_post.dart';
 import 'carousel_slider.dart';
 import 'horizontal_list.dart';
@@ -134,6 +135,10 @@ class _TitleBannerState extends State<TitleBanner> {
                     ),
                   );
                 },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: BusinessInformation(),
               ),
             ],
           ),
