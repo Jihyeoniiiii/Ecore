@@ -123,6 +123,7 @@ class _SignUpFormState extends State<SignUpForm> {
         'phone': _phoneController.text,
         'username': username,
         'createdAt': Timestamp.now(),
+        'points': 0,
       });
     } catch (e) {
       print('Error saving user to Firestore: $e');
