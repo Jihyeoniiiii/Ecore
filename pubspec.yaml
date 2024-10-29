@@ -105,6 +105,13 @@ flutter:
     - assets/images/logo.png
     - assets/images/ecore_logo.png
     - assets/images/default_profile.jpg
+    - assets/images/points/001.png
+    - assets/images/points/002.png
+    - assets/images/points/003.png
+    - assets/images/points/004.png
+    - assets/images/points/005.png
+    - assets/images/points/006.png
+    - assets/images/points/007.png
     #   - images/a_dot_ham.jpeg
     # To add assets to your application, add an assets section, like this:
     - assets/images/리유니클로.jpg
