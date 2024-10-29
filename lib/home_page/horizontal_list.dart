@@ -7,7 +7,6 @@ import 'feed_detail.dart';
 import 'feed_list.dart';
 import '../widgets/sold_out.dart'; // SoldOutOverlay 위젯 임포트
 import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore 임포트
-
 class HorizontalListSection extends StatelessWidget {
   final Stream<List<SellPostModel>> stream;
   final String title;
@@ -75,7 +74,7 @@ class HorizontalListSection extends StatelessWidget {
                 }
 
                 final items =
-                    snapshot.data!.take(6).toList(); // Limit to 6 items
+                snapshot.data!.take(6).toList(); // Limit to 6 items
 
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -125,14 +124,12 @@ class HorizontalListSection extends StatelessWidget {
                                   ),
                               ],
                             ),
+                            // 가격 표시 (PriceDisplay 위젯)
                             Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Text(
-                                post.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 14),
-                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 2.0, horizontal: 4.0),
+                              child: PriceDisplay(
+                                  price: post.price), // PriceDisplay 위젯 사용
                             ),
                             // Firestore에서 마켓 이름 가져오기
                             StreamBuilder<DocumentSnapshot>(
@@ -168,12 +165,15 @@ class HorizontalListSection extends StatelessWidget {
                                 );
                               },
                             ),
+                            // 상품 타이틀 표시
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 2.0, horizontal: 4.0),
-                              // PriceDisplay는 위젯이므로 Text 위젯으로 감쌀 필요 없음
-                              child: PriceDisplay(
-                                  price: post.price), // PriceDisplay 위젯 사용
+                              padding: const EdgeInsets.all(4.0),
+                              child: Text(
+                                post.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 14),
+                              ),
                             ),
                           ],
                         ),

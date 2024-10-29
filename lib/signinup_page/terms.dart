@@ -155,6 +155,121 @@ class TermsDetailPage extends StatelessWidget {
           ],
         );
 
+      case '이용 약관':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '제1장 총칙',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '제1조 (목적)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+                  '이 약관은 서비스 이용자가 주식회사 케어링크(이하 ‘회사’라 합니다)가 제공하는 서비스와 관련하여 '
+                  '회사와 서비스의 이용고객 간에 서비스의 이용 조건 및 절차, 상호간의 권리·의무, 책임 사항 및 기타 필요한 사항을 '
+                  '규정함을 목적으로 합니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제2조 (용어의 정의)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '이 약관에서 사용하는 용어의 정의는 다음 각호와 같으며, 정의되지 않은 용어에 대한 해석은 관계법령 및 서비스별 안내에서 정하는 바에 따릅니다.\n'
+                  '1. 서비스: PC, 휴대형 단말기 등 각종 유무선 기기 또는 프로그램을 통하여 회원이 이용할 수 있도록 회사가 제공하는 서비스 플랫폼 등을 포함한 모든 인터넷 서비스를 말합니다.\n'
+                  '2. 회원: 만14세 이상의 개인 또는 법인으로서 이 약관에 동의하고 회사와 이용 계약을 체결하여 회사가 제공하는 서비스를 사용하는 자를 말하며, 다음과 같이 일반회원과 판매회원으로 구분이 됩니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제3조 (약관의 명시, 효력 및 변경)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '제4조 (대리행위·보증의 부인)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제2장 이용계약 및 정보보호 ',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+                  '제5조 (서비스 이용계약의 성립)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '① 회사의 서비스에 관한 이용계약(이하 “이용계약"이라고 합니다)은 회사의 서비스를 이용하고자 하는 자가 이 약관에 동의하여 회원가입 신청을 하고, 회사가 이용승낙의 의사표시를 해당 서비스화면에 게시하거나, 전자우편 또는 기타 방법으로 통지함으로써 성립합니다.\n'
+                  '② 회원가입은 만 14세 이상의 개인 또는 사업자(개인사업자 및 법인사업자)가 할 수 있으며, 서비스를 이용하고자 하는 자가 이 약관에 동의하고, 회사가 정한 회원 가입 신청 양식에 포함된 정보(실명 등)를 사실과 다름없이 기입한 후 회사가 지정한 방법에 따라 제출하는 방법으로 합니다. 회사는 필요한 경우 관련 증빙 서류를 제출요청 할 수 있습니다.\n'
+                  '③ 회사는 『청소년보호법』 상의 보호대상인 회원, 만 19세미만의 회원, 외국인 회원, 법인 및 단체 회원 등 회원별로 서비스의 이용을 제한할 수 있으며, 이러한 서비스의 제한에 대한 사항은 개별 서비스에 별도 안내 또는 공지합니다. \n'
+                  '④ 회사는 다음 각호의 사유가 발생한 경우 이용신청에 대한 승낙을 거부하거나 유보할 수 있고, 해당 사유가 관련 법령을 위배하는 경우 이용 신청자는 관련 법령에 의거 처벌받을 수 있습니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+    Text(
+    '1. 제출 정보(본인확인절차 포함)의 내용에 허위, 기재 누락, 오기, 제3자 정보도용이 있는 경우\n'
+    '2. 회사가 본 조 제2항에 따라 제출한 정보의 정확성을 확인하기 위하여 관련 법령이 허용하는 범위 내의 증빙자료의 제공을 요청하였으나, 부당하게 이를 제공하지 않는 경우\n'
+    '3. 작가회원의 가입을 요청한 자와 서비스이용료를 납입하는 자의 정보가 다를 경우\n'
+    '4. 이미 가입된 회원과 정보(식별번호, 전자우편주소 등)가 동일한 경우\n'
+    '5. 제출 정보의 내용에 허위, 기재 누락, 오기가 있는 경우\n'
+    '6. 이 약관 또는 회사와의 계약 등에 의하여 회원자격을 상실한 적이 있거나, 이용신청의 제한이 있는 회원인 경우\n'
+    '7. 회사로부터 회원자격 정지 조치 등을 받은 회원이 그 조치기간 중에 이용계약을 임의 해지하고 재이용 신청을 하는 경우\n'
+    '8. 부정한 용도 또는 회사의 서비스 제공 목적에 반하여 영리를 추구할 목적으로 서비스를 이용하고자 하는 경우\n'
+    '9. 작가회원의 설비에 여유가 없거나 기술상 지장이 있는 경우\n'
+    '10. 이 약관에 위배되거나 위법 또는 부당한 이용신청임이 확인된 경우\n'
+    '11. 기타 회사가 합리적인 판단에 의하여 필요하다고 인정하는 경우',
+    textAlign: TextAlign.justify,
+    style: TextStyle(fontSize: 16),
+    ),
+    SizedBox(height: 16),
+    Text(
+    '제6조 (개인정보보호)',
+    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    ),
+            SizedBox(height: 8),
+    Text(
+    '① 회원은 이용신청 시 허위의 정보를 제공하여서는 아니되며, '
+    '② 회원의 정보를 허위로 수정하여 회사 또는 제3자에게 손해를 입힌 경우 발생한 모든 손해를 배상하여야 합니다.\n'
+    '③ 회원은 회원정보로써 기재 또는 회사에 제공한 사항(주소지, 대금결제를 위한 계좌정보 등)의 변경이 있는 경우 즉시 서비스 플랫폼 내에서 개인정보를 직접 수정하거나 '
+    '전자우편 또는 기타 방법으로 회사에게 그 변경 사항을 알리는 등 최신의 정보를 유지하여야 합니다.\n'
+    '④ 회사와 작가회원은 서비스 제공과 관련해 알게 된 개인정보를 본인의 승낙 없이 제3자에 누설, 배포하지 않으며 개인정보 보호법 등 관련 법령에 따릅니다.\n'
+    '⑤ 회사는 관련 법령에 따라 수사기관의 요청이 있을 경우 회원의 개인정보를 제공할 수 있습니다.',
+    textAlign: TextAlign.justify,
+    style: TextStyle(fontSize: 16),
+    ),
+    SizedBox(height: 16),
+    Text(
+    '제7조 (ID 및 비밀번호의 관리)',
+    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    ),
+            SizedBox(height: 8),
+    Text(
+    '① 회원의 ID 및 비밀번호 관리 책임은 회원에게 있으며, 이를 타인에게 양도, 증여, 대여하거나 담보로 제공할 수 없습니다.\n'
+    '② 다음 각 호에 해당하는 경우, 회사는 사전 통지 없이 ID 및 비밀번호 사용을 제한하거나 변경할 수 있습니다:\n'
+    '  - 타인의 개인정보를 도용하여 이용신청을 한 경우\n'
+    '  - ID 또는 비밀번호가 유출된 경우\n'
+    '  - 회원을 회사의 임직원이나 관계자로 오인할 우려가 있는 경우\n'
+    '③ 회원은 ID 또는 비밀번호가 유출되거나 제3자가 무단으로 사용할 경우 즉시 회사에 통보해야 합니다.\n'
+    '④ 회사는 회원의 ID 및 비밀번호 관리 소홀로 인한 불이익에 대해 책임지지 않습니다.',
+    textAlign: TextAlign.justify,
+    style: TextStyle(fontSize: 16),
+    ),
+          ],
+        );
+
       default:
         return Text('해당 제목에 대한 내용이 없습니다.');
     }

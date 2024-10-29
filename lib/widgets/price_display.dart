@@ -17,7 +17,7 @@ class PriceDisplay extends StatelessWidget {
         '$formattedPrice원', // 쉼표가 들어간 숫자 표시
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 14,
+          fontSize: 18,
         ),
       ),
     );
