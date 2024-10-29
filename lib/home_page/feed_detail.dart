@@ -178,80 +178,78 @@ class _FeedDetailState extends State<FeedDetail> {
         backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _buildImageCarousel(widget.sellPost.img), // 이미지 리스트 처리
-        SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _marketInfoBuild(context),
-              SizedBox(height: 16),
-              // 재고 정보 출력 추가 (재고 0일 때 '재고 없음'으로 출력)
-              Text(
-                widget.sellPost.stock > 0
-                    ? '재고 : ${widget.sellPost.stock}개' // 재고가 있으면 수량 출력
-                    : '재고 없음', // 재고가 0일 경우
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: widget.sellPost.stock > 0 ? Colors.black : Colors.red,
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(widget.sellPost.body, style: TextStyle(fontSize: 16)),
-              SizedBox(height: 15),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 1,
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildImageCarousel(widget.sellPost.img), // 이미지 리스트 처리
+            SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _marketInfoBuild(context),
+                  SizedBox(height: 16),
+                  // 재고 정보 출력 (재고가 없으면 '재고 없음' 출력)
+                  Text(
+                    widget.sellPost.stock > 0
+                        ? '재고 : ${widget.sellPost.stock}개'
+                        : '재고 없음',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: widget.sellPost.stock > 0 ? Colors.black : Colors.red,
                     ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '🌱  해당 기부제품으로 만들었어요',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      FutureBuilder<List<String>>(
-                          future: getDonaListImage(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(child: CircularProgressIndicator());
-                            } else if (snapshot.hasError) {
-                              return Text('이미지를 불러오는데 실패했습니다');
-                            } else if (!snapshot.hasData ||
-                                snapshot.data!.isEmpty) {
-                              return Text('이미지가 없습니다');
-                            } else {
-                              List<String> images = snapshot.data!;
+                  ),
+                  SizedBox(height: 16),
+                  Text(widget.sellPost.body, style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 15),
+                  FutureBuilder<List<String>>(
+                    future: getDonaListImage(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Text('이미지를 불러오는데 실패했습니다');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return SizedBox.shrink(); // 없으면 아무것도 표시하지 않음
+                      } else {
+                        List<String> images = snapshot.data!;
 
-                              List<List<String>> imageGroups = [];
-                              for (int i = 0; i < images.length; i += 3) {
-                                imageGroups.add(images.sublist(
-                                  i,
-                                  i + 3 > images.length ? images.length : i + 3,
-                                ));
-                              }
+                        List<List<String>> imageGroups = [];
+                        for (int i = 0; i < images.length; i += 3) {
+                          imageGroups.add(images.sublist(
+                            i,
+                            i + 3 > images.length ? images.length : i + 3,
+                          ));
+                        }
 
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '🌱  해당 기부제품으로 만들었어요',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 1,
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
                                 child: SizedBox(
                                   height: 180,
                                   child: PageView.builder(
@@ -262,29 +260,36 @@ class _FeedDetailState extends State<FeedDetail> {
                                       // 이미지가 1개일 때 Center로 감싸기
                                       if (group.length == 1) {
                                         return Center(
-                                          child: _buildImageContainer(group.first),
+                                          child:
+                                          _buildImageContainer(group.first),
                                         );
                                       }
 
                                       // 이미지가 2개 이상일 때 Row로 배치
                                       return Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: group.map((imageUrl) => _buildImageContainer(imageUrl)).toList(),
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                        children: group
+                                            .map((imageUrl) =>
+                                            _buildImageContainer(imageUrl))
+                                            .toList(),
                                       );
                                     },
                                   ),
                                 ),
-                              );
-                            }
-                          })
-                    ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                    },
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ])),
+      ),
       bottomNavigationBar: _bottomNaviBar(),
     );
   }
