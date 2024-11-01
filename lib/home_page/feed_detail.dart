@@ -70,34 +70,43 @@ class _FeedDetailState extends State<FeedDetail> {
       return;
     }
 
-    final userRef =
-        FirebaseFirestore.instance.collection('Users').doc(user.uid);
-    final userDoc = await userRef.get();
-    if (!userDoc.exists) {
-      // User document does not exist
-      print('User document does not exist');
-      return;
+    if(currentUserId != marketUserId) {
+      final userRef =
+      FirebaseFirestore.instance.collection('Users').doc(user.uid);
+      final userDoc = await userRef.get();
+      if (!userDoc.exists) {
+        // User document does not exist
+        print('User document does not exist');
+        return;
+      }
+
+      final cart = userDoc.data()?['cart'] ?? [];
+      final newCartItem = {
+        'sellId': widget.sellPost.sellId,
+        'title': widget.sellPost.title,
+        'img': widget.sellPost.img,
+        'price': widget.sellPost.price,
+        'category': widget.sellPost.category,
+        'body': widget.sellPost.body,
+        'marketId': widget.sellPost.marketId,
+        'marketName': marketName, // 추가: 마켓 이름 추가
+        'shippingFee': widget.sellPost.shippingFee,
+        'reference': widget.sellPost.reference.path,
+      };
+
+      // Add the new item to the cart
+      cart.add(newCartItem);
+
+      // Update the user's cart in Firestore
+      await userRef.update({'cart': cart});
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("자신의 마켓 상품은 구매할 수 없습니다."),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
-
-    final cart = userDoc.data()?['cart'] ?? [];
-    final newCartItem = {
-      'sellId': widget.sellPost.sellId,
-      'title': widget.sellPost.title,
-      'img': widget.sellPost.img,
-      'price': widget.sellPost.price,
-      'category': widget.sellPost.category,
-      'body': widget.sellPost.body,
-      'marketId': widget.sellPost.marketId,
-      'marketName': marketName, // 추가: 마켓 이름 추가
-      'shippingFee': widget.sellPost.shippingFee,
-      'reference': widget.sellPost.reference.path,
-    };
-
-    // Add the new item to the cart
-    cart.add(newCartItem);
-
-    // Update the user's cart in Firestore
-    await userRef.update({'cart': cart});
   }
 
   Future<void> _checkIfFavorite() async {
