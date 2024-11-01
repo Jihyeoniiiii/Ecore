@@ -206,15 +206,10 @@ class _SellListState extends State<SellList> {
                     ),
                   ];
                 },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    '...',
-                    style: TextStyle(
-                      fontSize: 20, // 가격과 비슷한 크기
-                      color: Colors.grey,
-                    ),
-                  ),
+                child: Icon(
+                  Icons.more_vert,
+                  size: 20,
+                  color: Colors.grey,
                 ),
               ),
             ],
