@@ -415,34 +415,38 @@ class _FeedDetailState extends State<FeedDetail> {
     );
   }
 
-  Row _marketView(
+  Column _marketView(
       String marketImage, String marketName, String businessNumber) {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          backgroundImage: CachedNetworkImageProvider(marketImage),
-          radius: 30,
+        Padding(
+          padding: const EdgeInsets.only(left: 2.0),
+          child: Text(
+            widget.sellPost.title,
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-        SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              widget.sellPost.title,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
+            CircleAvatar(
+              backgroundImage: CachedNetworkImageProvider(marketImage),
+              radius: 30,
             ),
-            SizedBox(height: 8),
+            SizedBox(width: 16),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   marketName,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 ),
                 if (businessNumber.isNotEmpty) // 비즈니스 넘버가 존재할 때 체크 아이콘 추가
                   Padding(
-                    padding: const EdgeInsets.only(left: 4.0), // 아이콘과 텍스트 간격 조절
+                    padding: const EdgeInsets.only(left: 4.0, top: 3.0), // 아이콘과 텍스트 간격 조절
                     child: Icon(
                       Icons.check_circle,
                       color: Colors.blue, // 체크 아이콘 색상 설정
@@ -451,44 +455,44 @@ class _FeedDetailState extends State<FeedDetail> {
                   ),
               ],
             ),
+            Spacer(),
+            IconButton(
+              onPressed: () {
+                if (currentUserId == marketUserId) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        content: Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: Text("자신의 마켓과는 채팅이 불가합니다."),
+                        ),
+                        actions: [
+                          TextButton(
+                            child: Text("확인"),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // 다이얼로그 닫기
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatBanner(
+                          marketId: widget.sellPost.marketId,
+                          sellId: widget.sellPost.sellId),
+                    ),
+                  );
+                }
+              },
+              icon: Icon(Icons.mail, size: 30),
+            )
           ],
         ),
-        Spacer(),
-        IconButton(
-          onPressed: () {
-            if (currentUserId == marketUserId) {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    content: Padding(
-                      padding: const EdgeInsets.only(top: 15),
-                      child: Text("자신의 마켓과는 채팅이 불가합니다."),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text("확인"),
-                        onPressed: () {
-                          Navigator.of(context).pop(); // 다이얼로그 닫기
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            } else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatBanner(
-                      marketId: widget.sellPost.marketId,
-                      sellId: widget.sellPost.sellId),
-                ),
-              );
-            }
-          },
-          icon: Icon(Icons.mail, size: 30),
-        )
       ],
     );
   }
