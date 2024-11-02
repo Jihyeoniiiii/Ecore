@@ -40,9 +40,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera to take pictures for upload.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to upload images.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-    <string>앱이 사진에 접근하려면 권한이 필요합니다.</string>
+	<string>앱이 사진에 접근하려면 권한이 필요합니다.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

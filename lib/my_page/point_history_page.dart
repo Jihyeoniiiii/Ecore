@@ -18,6 +18,7 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
     'assets/images/points/001.png',
     'assets/images/points/002.png',
     'assets/images/points/003.png',
+    'assets/images/points/004.png',
   ];
 
   @override

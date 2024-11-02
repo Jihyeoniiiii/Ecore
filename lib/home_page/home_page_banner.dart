@@ -102,7 +102,26 @@ class _TitleBannerState extends State<TitleBanner> {
               ),
               HorizontalListSection(
                 stream: businessSellPostsStream(), // Stream 설정
-                title: '믿고 거래하는 에코리 상품',
+                title: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0, bottom: 0.0), // 왼쪽 여백 추가
+                      child: Text(
+                        '믿고 거래하는 에코리 상품',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // 스타일 설정
+                      ),
+                    ),
+                    // 로고 이미지
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0), // 이미지와 텍스트 사이의 간격
+                      child: Image.asset(
+                        'assets/images/ecore_2_logo.png', // 로고 이미지 파일 경로
+                        width: 30, // 이미지의 너비
+                        height: 30, // 이미지의 높이
+                      ),
+                    ),
+                  ],
+                ),
                 onMorePressed: () {
                   Navigator.push(
                     context,
@@ -112,9 +131,17 @@ class _TitleBannerState extends State<TitleBanner> {
                   );
                 },
               ),
+
+
               HorizontalListSection(
                 stream: userModel.recentlyViewedStream,
-                title: '최근 본 상품',
+                title: Padding( // Padding 추가
+                  padding: const EdgeInsets.only(left: 16.0), // 왼쪽 여백 추가
+                  child: Text(
+                    '최근 본 상품',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 onMorePressed: () {
                   Navigator.push(
                     context,
@@ -126,7 +153,13 @@ class _TitleBannerState extends State<TitleBanner> {
               ),
               HorizontalListSection(
                 stream: userModel.favoriteListStream,
-                title: '찜한 상품',
+                title: Padding( // Padding 추가
+                  padding: const EdgeInsets.only(left: 16.0), // 왼쪽 여백 추가
+                  child: Text(
+                    '찜한 상품',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 onMorePressed: () {
                   Navigator.push(
                     context,
@@ -136,6 +169,7 @@ class _TitleBannerState extends State<TitleBanner> {
                   );
                 },
               ),
+
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: BusinessInformation(),
