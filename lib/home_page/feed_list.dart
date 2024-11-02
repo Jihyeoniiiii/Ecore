@@ -1,3 +1,4 @@
+import 'package:ecore/widgets/price_display.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -239,16 +240,7 @@ class _SellListState extends State<SellList> {
               );
             },
           ),
-          Text(
-            '${sellPost.price}원', // 가격
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          PriceDisplay(price: sellPost.price, fontSize:15)
         ],
       ),
     );

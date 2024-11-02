@@ -78,6 +78,7 @@ class _DonaDetailState extends State<DonaDetail> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
+                  SizedBox(height: 16),
                   RichText(
                     text: TextSpan(
                       children: [

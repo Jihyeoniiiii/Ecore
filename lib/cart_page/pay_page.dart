@@ -360,25 +360,36 @@ class _PayPageState extends State<PayPage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(55.0),
         child: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          automaticallyImplyLeading: false,
-          flexibleSpace: Container(
-            color: baseColor,
-            child: Center(
-              child: Text(
+          backgroundColor: baseColor,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Spacer를 사용하여 버튼과 텍스트 사이의 공간을 조정
+              Expanded(
+                child: Container(),
+              ),
+              Text(
                 "주문",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
+              Expanded(
+                child: Container(),
+              ),
+              Expanded(
+                child: Container(),
+              ),
+            ],
           ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          titleSpacing: 0, // title과 leading 사이의 기본 간격을 제거
         ),
       ),
       body: RefreshIndicator(
@@ -902,7 +913,7 @@ class _PayPageState extends State<PayPage> {
           side: BorderSide.none,
         ),
         child: Text(
-          '주문',
+          '결제하기',
           style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
