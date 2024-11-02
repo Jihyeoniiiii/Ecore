@@ -1,13 +1,12 @@
-import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:typed_data'; // Uint8List를 사용하기 위해 임포트
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class DonaProductForm extends StatefulWidget {
   @override
@@ -16,6 +15,7 @@ class DonaProductForm extends StatefulWidget {
 
 class _DonaProductFormState extends State<DonaProductForm> {
   final _formKey = GlobalKey<FormState>();
+  Uint8List? _imageData; // 서버에서 받은 이미지 데이터
   XFile? _aiImage; // Single image for AI processing
   List<XFile>? _images = []; // 여러 이미지를 저장할 리스트
   final picker = ImagePicker();
@@ -84,14 +84,9 @@ class _DonaProductFormState extends State<DonaProductForm> {
       var response = await request.send();
 
       if (response.statusCode == 200) {
-        var responseData = await http.Response.fromStream(response);
-        var result = jsonDecode(responseData.body);
-
+        final bytes = await http.Response.fromStream(response);
         setState(() {
-          _points = result['points'];
-          print(result['image_url']);
-
-          _condition = _evaluateCondition(_points!); // 포인트에 따른 상태 설정
+          _imageData = bytes.bodyBytes as Uint8List?; // Uint8List 형태로 저장
         });
       } else {
         print('이미지 업로드 실패: ${response.statusCode}');
@@ -148,31 +143,7 @@ class _DonaProductFormState extends State<DonaProductForm> {
     return downloadUrls;
   }
 
-  Future<Map<String, dynamic>?> uploadImageToFlask(XFile imageFile) async {
-    try {
-      var uri = Uri.parse(_serverUrl);
 
-      var request = http.MultipartRequest('POST', uri);
-      request.files.add(await http.MultipartFile.fromPath(
-        'file',
-        imageFile.path,
-        filename: path.basename(imageFile.path),
-      ));
-
-      var response = await request.send();
-
-      if (response.statusCode == 200) {
-        var responseData = await http.Response.fromStream(response);
-        return jsonDecode(responseData.body); // 서버에서 받은 JSON 데이터를 Map으로 변환
-      } else {
-        print('이미지 업로드 실패: ${response.statusCode}');
-        return null;
-      }
-    } catch (e) {
-      print('이미지 업로드 중 오류 발생: $e');
-      return null;
-    }
-  }
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -189,19 +160,6 @@ class _DonaProductFormState extends State<DonaProductForm> {
       try {
         List<String> imageUrls = [];
         List<Map<String, dynamic>> results = [];  // 이미지 처리 결과 저장
-
-        // if (_images != null && _images!.isNotEmpty) {
-        //   // 이미지를 Flask 서버로 업로드하고 면적/등급 정보 받기
-        //   for (XFile image in _images!) {
-        //     Map<String, dynamic>? result = await uploadImageToFlask(image); // Flask 서버에 이미지 업로드
-        //     if (result != null) {
-        //       imageUrls.add(result['image_url']);  // 이미지를 서버에 업로드하고 URL 받기
-        //       // results.add({'area': result['area'], 'grade': result['grade']});  // 처리 결과 받기
-        //     } else {
-        //       throw Exception('Image upload failed');
-        //     }
-        //   }
-        // }
 
         // Firestore에 상품 정보와 함께 이미지 URL 및 결과값(면적, 등급) 저장
         DocumentReference docRef = await _firestore.collection('DonaPosts').add({
@@ -307,6 +265,11 @@ class _DonaProductFormState extends State<DonaProductForm> {
                   ),
                 ],
               ),
+              if (_imageData != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Image.memory(_imageData!), // 서버에서 받은 이미지 데이터 표시
+                ),
               if (_points != null)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

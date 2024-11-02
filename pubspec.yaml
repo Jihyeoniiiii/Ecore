@@ -105,6 +105,8 @@ flutter:
     - assets/images/logo.png
     - assets/images/ecore_logo.png
     - assets/images/default_profile.jpg
+    - assets/images/ecore_2.webp
+    - assets/images/ecore_2_logo.png
     - assets/images/points/001.png
     - assets/images/points/002.png
     - assets/images/points/003.png

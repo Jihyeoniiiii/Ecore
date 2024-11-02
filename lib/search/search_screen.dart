@@ -186,7 +186,7 @@ class _SearchScreenState extends State<SearchScreen> {
               Text('인기 검색어', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
               Column(
-                children: _popularSearches.asMap().entries.map((entry) {
+                children: _popularSearches.asMap().entries.take(6).map((entry) { // 6개까지만 표시
                   int index = entry.key;
                   String term = entry.value['term'];
                   return ListTile(
@@ -196,6 +196,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 }).toList(),
               ),
             ],
+
           ],
         ),
       ),
