@@ -150,11 +150,22 @@ class _SellListState extends State<SellList> {
                     top: -1,
                     right: -4,
                     child: IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.white,
+                      icon: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(
+                            Icons.favorite,
+                            color: Colors.black.withOpacity(0.2),
+                            size: 24,
+                          ),
+                          Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : Colors.white,
+                            size: 24,
+                          ),
+                        ],
                       ),
-                      onPressed: () => _toggleFavorite(sellPost, isFavorite), // 하트 클릭 시 동작 추가
+                        onPressed: () => _toggleFavorite(sellPost, isFavorite),
                     ),
                   );
                 },
@@ -195,15 +206,10 @@ class _SellListState extends State<SellList> {
                     ),
                   ];
                 },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    '...',
-                    style: TextStyle(
-                      fontSize: 20, // 가격과 비슷한 크기
-                      color: Colors.grey,
-                    ),
-                  ),
+                child: Icon(
+                  Icons.more_vert,
+                  size: 20,
+                  color: Colors.grey,
                 ),
               ),
             ],
