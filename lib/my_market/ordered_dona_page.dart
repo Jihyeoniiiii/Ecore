@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import '../my_page/create_review_page.dart';
+import 'create_dona_review.dart';
 
 class OrderedDonaPage extends StatefulWidget {
   final String marketId;
@@ -207,7 +207,7 @@ class _OrderedDonaPageState extends State<OrderedDonaPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CreateReview(
+                            builder: (context) => CreateDonaReview(
                               orderId: order.id,
                               itemIndex: 0,
                               itemTitle: title,
