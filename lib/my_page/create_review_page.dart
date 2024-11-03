@@ -199,6 +199,7 @@ class _CreateReviewState extends State<CreateReview> {
       'itemIndex': widget.itemIndex,
       'itemTitle': widget.itemTitle,
       'marketId': widget.marketId,
+      'byseller_reveiw' : 'true',
     };
 
     try {
