@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore 임포트
 import '../home_page/feed_detail.dart';
 import '../models/firestore/user_model.dart';
 import '../models/firestore/sell_post_model.dart';
+import '../widgets/price_display.dart';
 import '../widgets/sold_out.dart'; // SoldOutOverlay 위젯 임포트
 
 class RecentViewedPage extends StatelessWidget {
@@ -84,16 +85,9 @@ class RecentViewedPage extends StatelessWidget {
                           ],
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // 간격 조정
-                          child: Text(
-                            post.title,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[900], // 특정 회색으로 변경
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 1.0, horizontal: 4.0), // 간격 축소
+                          child: PriceDisplay(
+                              price: post.price), // PriceDisplay 위젯 사용
                         ),
                         // Firestore에서 마켓 이름 가져오기
                         StreamBuilder<DocumentSnapshot>(
@@ -104,19 +98,19 @@ class RecentViewedPage extends StatelessWidget {
                           builder: (context, marketSnapshot) {
                             if (marketSnapshot.connectionState == ConnectionState.waiting) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.5), // 간격 축소
                                 child: Text('로딩 중...'),
                               );
                             }
                             if (marketSnapshot.hasError) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.5), // 간격 축소
                                 child: Text('에러 발생'),
                               );
                             }
                             if (!marketSnapshot.hasData || !marketSnapshot.data!.exists) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.5), // 간격 축소
                                 child: Text('마켓 없음'),
                               );
                             }
@@ -124,19 +118,24 @@ class RecentViewedPage extends StatelessWidget {
                             final marketName = marketSnapshot.data!['name']; // name 필드 가져오기
 
                             return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1.0), // 간격 조정
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.5), // 간격 축소
                               child: Text(
                                 marketName, // Firestore에서 가져온 마켓 이름 표시
-                                style: TextStyle(fontSize: 14, color: Colors.black54), // 스타일 조정 가능
+                                style: TextStyle(fontSize: 11, color: Colors.black54), // 스타일 조정 가능
                               ),
                             );
                           },
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // 가격과의 간격 조정
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1.0), // 간격 축소
                           child: Text(
-                            '${post.price}원', // 가격을 상단에 배치
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), // 가격 글씨 크기 조정
+                            post.title,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54, // 특정 회색으로 변경
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

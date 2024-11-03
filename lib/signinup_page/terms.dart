@@ -428,6 +428,8 @@ class TermsDetailPage extends StatelessWidget {
           0: IntrinsicColumnWidth(),
           1: IntrinsicColumnWidth(),
           2: IntrinsicColumnWidth(),
+          3: IntrinsicColumnWidth(),
+
         },
         children: [
           TableRow(
@@ -436,12 +438,15 @@ class TermsDetailPage extends StatelessWidget {
               TableCell(child: Padding(padding: EdgeInsets.all(8.0), child: Text('제공받는 자', style: TextStyle(fontWeight: FontWeight.bold)))),
               TableCell(child: Padding(padding: EdgeInsets.all(8.0), child: Text('제공하는 항목', style: TextStyle(fontWeight: FontWeight.bold)))),
               TableCell(child: Padding(padding: EdgeInsets.all(8.0), child: Text('이용목적', style: TextStyle(fontWeight: FontWeight.bold)))),
+              TableCell(child: Padding(padding: EdgeInsets.all(8.0), child: Text('보유 이용기간', style: TextStyle(fontWeight: FontWeight.bold)))),
+
             ],
           ),
           TableRow(children: [
             TableCell(child: Padding(padding: EdgeInsets.all(8.0), child: Text('케어링크'))),
             TableCell(child: Padding(padding: EdgeInsets.all(8.0), child: Text('이용자의 앱 이용내역, 광고식별자'))),
             TableCell(child: Padding(padding: EdgeInsets.all(8.0), child: Text('맞춤형 서비스 제공'))),
+            TableCell(child: Padding(padding: EdgeInsets.all(8.0), child: Text('발송완료 후 15일'))),
           ]),
           // 추가 행을 필요에 맞게 추가
         ],
