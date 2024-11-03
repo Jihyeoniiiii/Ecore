@@ -158,10 +158,13 @@ class _DonaProductFormState extends State<DonaProductForm> {
       _showLoadingDialog();
 
       try {
+        // 1. 이미지를 Firebase Storage에 업로드하여 다운로드 URL을 가져옵니다.
         List<String> imageUrls = [];
-        List<Map<String, dynamic>> results = [];  // 이미지 처리 결과 저장
+        if (_images != null && _images!.isNotEmpty) {
+          imageUrls = await uploadImages(_images!);  // 업로드 후 URL 리스트를 imageUrls에 저장
+        }
 
-        // Firestore에 상품 정보와 함께 이미지 URL 및 결과값(면적, 등급) 저장
+        // 2. Firestore에 기부 상품 정보와 이미지 URL 리스트를 저장합니다.
         DocumentReference docRef = await _firestore.collection('DonaPosts').add({
           'title': title,
           'category': category,
@@ -169,15 +172,14 @@ class _DonaProductFormState extends State<DonaProductForm> {
           'color': color,
           'condition': condition,
           'body': body,
-          'img': imageUrls, // 서버로부터 받은 이미지 URL들 저장
+          'img': imageUrls, // 업로드한 이미지 URL 리스트 저장
           'viewCount': 0,
           'createdAt': FieldValue.serverTimestamp(),
           'userId': currentUser?.uid, // 현재 사용자의 UID 추가
           'point': point, // 포인트 필드 추가
-          'results': results,  // 면적과 등급 정보 저장
         });
 
-        // Users 컬렉션의 my_posts 배열에 문서 ID 추가
+        // 3. Users 컬렉션의 my_posts 배열에 문서 ID 추가
         await _firestore.collection('Users').doc(currentUser?.uid).update({
           'my_posts': FieldValue.arrayUnion([docRef.id]) // 새로운 문서 ID 추가
         });
@@ -198,6 +200,7 @@ class _DonaProductFormState extends State<DonaProductForm> {
       }
     }
   }
+
 
   void _showLoadingDialog() {
     showDialog(
