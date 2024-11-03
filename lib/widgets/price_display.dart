@@ -13,7 +13,7 @@ class PriceDisplay extends StatelessWidget {
     final formattedPrice = NumberFormat('#,###').format(price);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 2.0),
       child: Text(
         '$formattedPrice', // 쉼표가 들어간 숫자 표시
         style: TextStyle(

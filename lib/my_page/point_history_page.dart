@@ -271,7 +271,6 @@ class _TutorialPageState extends State<TutorialPage> {
             },
           ),
         ),
-        // 다음 화살표 버튼 (사진의 오른쪽 하단, 흰색 `>` 텍스트)
         Positioned(
           bottom: 24,
           right: 24,
@@ -284,10 +283,32 @@ class _TutorialPageState extends State<TutorialPage> {
             }
                 : null, // 마지막 이미지일 때 비활성화
             child: Text(
-              '>',
+              '다음',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 24,
+          left: 24,
+          child: GestureDetector(
+            onTap: _currentIndex > 0
+                ? () {
+              setState(() {
+                _currentIndex--;
+              });
+            }
+                : null, // 첫 번째 이미지일 때 비활성화
+            child: Text(
+              '이전',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 decoration: TextDecoration.none,
               ),
