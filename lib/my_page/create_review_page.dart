@@ -199,6 +199,7 @@ class _CreateReviewState extends State<CreateReview> {
       'itemIndex': widget.itemIndex,
       'itemTitle': widget.itemTitle,
       'marketId': widget.marketId,
+      'bySeller_review': 'false', // 새 필드 추가
     };
 
     try {
