@@ -1,3 +1,4 @@
+import 'package:ecore/widgets/price_display.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -233,15 +234,7 @@ class _SellListState extends State<SellList> {
               );
             },
           ),
-          Text(
-            sellPost.title, // 제목
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.black54,
-            ),
-            maxLines: 1, // 제목이 한 줄을 넘어가면 생략
-            overflow: TextOverflow.ellipsis,
-          ),
+          PriceDisplay(price: sellPost.price, fontSize:15)
         ],
       ),
     );

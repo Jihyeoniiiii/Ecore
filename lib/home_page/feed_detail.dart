@@ -8,6 +8,7 @@ import '../models/firestore/user_model.dart';
 import 'package:provider/provider.dart';
 import '../search/market_detail.dart';
 import '../chat_page/chat_banner.dart';
+import '../widgets/price_display.dart';
 import '../widgets/sold_out.dart';
 import '../widgets/view_counter.dart';
 
@@ -355,10 +356,7 @@ class _FeedDetailState extends State<FeedDetail> {
                   onPressed: _toggleFavorite,
                 ),
                 SizedBox(width: 8),
-                Text(
-                  '${widget.sellPost.price}원',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+                PriceDisplay(price: widget.sellPost.price, fontSize:20),
               ],
             ),
             ElevatedButton.icon(

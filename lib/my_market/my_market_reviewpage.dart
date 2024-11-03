@@ -37,6 +37,7 @@ class MyMarketReviewPage extends StatelessWidget {
           stream: FirebaseFirestore.instance
               .collection('Reviews')
               .where('marketId', isEqualTo: marketId) // 해당 marketId의 리뷰만 필터링
+              .where('byseller_review', isEqualTo: 'true')
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {

@@ -240,6 +240,7 @@ class UserProfilePage extends StatelessWidget {
               stream: FirebaseFirestore.instance
                   .collection('Reviews')
                   .where('userId', isEqualTo: userId) // 해당 userId의 리뷰들 가져오기
+                  .where('byseller_review', isEqualTo : 'false')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

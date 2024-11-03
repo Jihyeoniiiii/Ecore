@@ -1,3 +1,4 @@
+import 'package:ecore/donation_page/dona_review_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,6 +29,7 @@ class _MyReviewPageState extends State<MyReviewPage> {
     final snapshot = await _firestore
         .collection('Reviews')
         .where('userId', isEqualTo: userId)
+        .where('byseller_review', isEqualTo: 'false') // 추가된 조건
         .orderBy('timestamp', descending: true)
         .get();
 
@@ -155,7 +157,12 @@ class _MyReviewPageState extends State<MyReviewPage> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    // 설정 -> 받은 거래 상세로 라우팅
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DonaReviewPage(userId: widget.userModel.userKey), // userId를 전달
+                      ),
+                    );
                   },
                   child: Text('내 기부글 후기'),
                 ),

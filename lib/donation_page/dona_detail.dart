@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../cosntants/common_color.dart';
 import '../models/firestore/dona_post_model.dart';
 import '../widgets/view_counter.dart';
 import 'dona_profile.dart';
@@ -37,13 +38,26 @@ class _DonaDetailState extends State<DonaDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(55.0),
+        child: AppBar(
+          //backgroundColor: baseColor,
+          title: Text(
+            "주문",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          titleSpacing: 0, // title과 leading 사이의 기본 간격을 제거
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildImageCarousel(widget.donaPost.img), // 이미지 리스트 처리
-            SizedBox(height: 16),
+            SizedBox(height: 4), // 간격을 줄임
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -60,10 +74,8 @@ class _DonaDetailState extends State<DonaDetail> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _userInfoBuild(context),
-                    // 사용자 정보 표시
-                    SizedBox(height: 16),
+                    SizedBox(height: 4), // 간격을 줄임
                     Divider(thickness: 1, color: Colors.grey),
-                    // 사용자 정보와 상품 정보를 나누는 선 추가
                   ],
                 ),
               ),
@@ -78,15 +90,20 @@ class _DonaDetailState extends State<DonaDetail> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
+                  SizedBox(height: 4), // 간격을 줄임
+                  // 날짜 추가
+                  Text(
+                    '날짜: ${widget.donaPost.createdAt.toLocal().toString().split(' ')[0]}', // 날짜 포맷
+                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                  ),
+                  SizedBox(height: 4), // 간격을 줄임
                   RichText(
                     text: TextSpan(
                       children: [
                         TextSpan(text: '상태: ',
-                            style: TextStyle(fontSize: 16, color: Colors
-                                .grey[700])),
+                            style: TextStyle(fontSize: 16, color: Colors.grey[700])),
                         TextSpan(text: widget.donaPost.condition,
-                            style: TextStyle(fontSize: 16, color: Colors
-                                .black)),
+                            style: TextStyle(fontSize: 16, color: Colors.black)),
                       ],
                     ),
                   ),
@@ -94,11 +111,9 @@ class _DonaDetailState extends State<DonaDetail> {
                     text: TextSpan(
                       children: [
                         TextSpan(text: '색상: ',
-                            style: TextStyle(fontSize: 16, color: Colors
-                                .grey[700])),
+                            style: TextStyle(fontSize: 16, color: Colors.grey[700])),
                         TextSpan(text: widget.donaPost.color,
-                            style: TextStyle(fontSize: 16, color: Colors
-                                .black)),
+                            style: TextStyle(fontSize: 16, color: Colors.black)),
                       ],
                     ),
                   ),
@@ -106,17 +121,14 @@ class _DonaDetailState extends State<DonaDetail> {
                     text: TextSpan(
                       children: [
                         TextSpan(text: '재질: ',
-                            style: TextStyle(fontSize: 16, color: Colors
-                                .grey[700])),
+                            style: TextStyle(fontSize: 16, color: Colors.grey[700])),
                         TextSpan(text: widget.donaPost.material,
-                            style: TextStyle(fontSize: 16, color: Colors
-                                .black)),
+                            style: TextStyle(fontSize: 16, color: Colors.black)),
                       ],
                     ),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 4), // 간격을 줄임
                   Text(widget.donaPost.body, style: TextStyle(fontSize: 16)),
-                  // body 부분
                 ],
               ),
             ),
@@ -156,6 +168,7 @@ class _DonaDetailState extends State<DonaDetail> {
       ),
     );
   }
+
 
   Future<void> _addToCart() async {
     final user = FirebaseAuth.instance.currentUser;

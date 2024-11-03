@@ -22,6 +22,7 @@ class DonaReviewPage extends StatelessWidget {
               stream: FirebaseFirestore.instance
                   .collection('Reviews')
                   .where('userId', isEqualTo: userId)  // 유저 ID로 필터링
+                  .where('byseller_review', isEqualTo: 'false')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

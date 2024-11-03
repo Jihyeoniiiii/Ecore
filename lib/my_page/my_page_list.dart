@@ -92,7 +92,7 @@ class _MyPageListState extends State<MyPageList> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(thickness: 5),
+        Divider(thickness: 2),
         Text('스토어'),
         TextButton(
             onPressed: () {

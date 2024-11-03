@@ -147,7 +147,7 @@ class HorizontalListSection extends StatelessWidget {
 
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      vertical: 1.0, horizontal: 4.0),
+                                      vertical: 0.0, horizontal: 4.0),
                                   child: Text(
                                     marketName,
                                     style: TextStyle(
