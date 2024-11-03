@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+import '../signinup_page/terms.dart';
+
 class PointHistoryPage extends StatefulWidget {
   @override
   _PointHistoryPageState createState() => _PointHistoryPageState();
@@ -78,9 +80,11 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
                 SizedBox(height: 8),
                 GestureDetector(
                   onTap: () {
-                    // 포인트 이용 약관 페이지로 이동 또는 알림
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('포인트 이용 약관 페이지로 이동합니다.')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TermsDetailPage(title: '포인트 이용 약관'),
+                      ),
                     );
                   },
                   child: Text(

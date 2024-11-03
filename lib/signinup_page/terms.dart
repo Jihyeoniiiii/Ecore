@@ -270,6 +270,150 @@ class TermsDetailPage extends StatelessWidget {
           ],
         );
 
+      case '포인트 이용 약관':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '제 1 조 (목적)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '이 약관은 [에코리]에서 제공하는 포인트 제도의 이용에 관한 사항을 규정함으로써, '
+                  '사용자와 회사 간의 권리 및 의무를 명확히 하고, 원활한 서비스 이용을 도모하는 것을 목적으로 합니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 2 조 (정의)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. "포인트"란 사용자가 [에코리] 내에서 특정 활동을 통해 적립하거나 사용할 수 있는 가상의 통화를 의미합니다.\n'
+                  '2. "사용자"란 본 앱에 가입하여 포인트를 적립하고 사용할 수 있는 개인 또는 법인을 의미합니다.\n'
+                  '3. "적립"이란 사용자가 활동을 통해 포인트를 얻는 행위를 의미합니다.\n'
+                  '4. "사용"이란 적립한 포인트를 통해 상품 구매나 서비스 이용을 하는 행위를 의미합니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 3 조 (포인트 적립)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. 사용자는 앱 내에서 제공하는 다양한 활동(예: 상품 구매, 리뷰 작성, 추천인 코드 입력 등)을 통해 포인트를 적립할 수 있습니다.\n'
+                  '2. 포인트 적립 비율 및 조건은 앱 내에서 별도로 공지하며, 회사는 사전 예고 없이 이를 변경할 수 있습니다.\n'
+                  '3. 특정 이벤트나 프로모션에 따라 추가 포인트가 제공될 수 있으며, 해당 조건은 각 이벤트에 명시된 바에 따릅니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 4 조 (포인트 사용)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. 사용자는 적립한 포인트를 앱 내에서 상품 구매 또는 서비스 이용 시 사용할 수 있습니다.\n'
+                  '2. 사용자는 마켓에서 상품을 구매 시 다른 결제 수단과 함께 “에코리 포인트”를 사용할 수 있으며, “에코리 포인트”는 최대 상품금액의 7%까지 사용 가능합니다.\n'
+                  '3. 포인트 사용 시 최소 사용 가능 포인트는 [금액]으로 설정되며, 이는 회사의 정책에 따라 변경될 수 있습니다.\n'
+                  '4. 특정 상품이나 서비스에 대해서는 포인트 사용이 제한될 수 있으며, 이에 대한 사항은 앱 내에 별도로 공지합니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 5 조 (포인트 유효기간)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. 적립된 포인트는 적립일로부터 [기간] 동안 유효합니다. 유효기간이 만료된 포인트는 자동으로 소멸됩니다.\n'
+                  '2. 포인트 소멸에 대한 공지는 앱 내에서 사전에 안내하며, 사용자는 이를 확인할 책임이 있습니다.\n'
+                  '3. 사용자가 포인트 유효기간 만료 전에 포인트를 사용할 경우, 사용한 포인트는 소멸되지 않습니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 6 조 (포인트 전환 및 환불)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. 적립된 포인트는 현금으로 환전할 수 없습니다.\n'
+                  '2. 사용자가 포인트를 사용한 후에는 환불이 불가능하며, 포인트 사용에 대한 모든 책임은 사용자에게 있습니다.\n'
+                  '3. 포인트의 전환 및 환불 정책은 앱 내에 별도로 명시하며, 변경 시 사전 공지합니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 7 조 (포인트 관리)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. 사용자는 자신의 포인트 잔액 및 적립 내역을 앱 내에서 확인할 수 있습니다.\n'
+                  '2. 포인트 관련 오류가 발생한 경우, 사용자는 즉시 고객센터에 문의해야 하며, 회사는 이를 확인 후 조치를 취할 수 있습니다.\n'
+                  '3. 부정한 방법으로 포인트를 적립한 경우, 회사는 해당 포인트를 무효화하거나 사용자 계정을 정지할 수 있습니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 8 조 (포인트 대금 지급)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '마켓에서 구매한 재화 등의 대금 지급은 다음 각 호의 어느 하나의 방법으로 할 수 있습니다. 단, “회사”가 필요로 하는 경우 재화 등의 대금 지급 방법을 각 호의 방법 중 회사가 정한 방법으로 결정할 수 있습니다. 회사는 이용자의 지급방법에 대하여 재화 등의 대금에 어떠한 명목의 수수료도 추가하여 징수할 수 없습니다.\n'
+                  '1. 폰뱅킹, 인터넷뱅킹, 메일 뱅킹 등의 각종 계좌이체\n'
+                  '2. 선불카드, 직불카드, 신용카드 등의 각종 카드 결제\n'
+                  '3. 온라인무통장입금\n'
+                  '4. 전자화폐에 의한 결제 (휴대폰 결제, 온라인 결제서비스를 통한 결제 등)\n'
+                  '5. 수령 시 대금지급\n'
+                  '6. 에코리 포인트 등 “마켓”이 지급한 포인트에 의한 결제\n'
+                  '7. 기타 전자적 지급 방법에 의한 대금 지급 등\n\n'
+                  '회사는 사용자가 재화 등을 공급받기 전에 제1조제2호 및 제5호을 제외한 방법으로 재화 등의 대금을 지급하는 경우, 해당 결제 대금을 제3자에게 예치하고 공급이 완료된 후 “회사” 또는 “판매자”에게 지급하도록 하는 ‘구매안전 서비스’를 제공합니다.\n'
+                  '사용자는 재화 등을 거래한 날부터 4영업일 이내에 그 사실을 회사에 통보해야 하며, 4영업일이 지나도록 정당한 사유 없이 거래한 사실을 통보하지 않는 경우 예치된 대금은 회사가 지정한 정산대행업체에게 지급될 수 있습니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 9 조 (약관 변경)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. 회사는 이 약관을 변경할 수 있으며, 변경 시 앱 내에 공지합니다.\n'
+                  '2. 변경된 약관은 공지된 날로부터 효력이 발생하며, 사용자는 이를 확인할 책임이 있습니다.\n'
+                  '3. 변경된 약관에 동의하지 않는 경우, 사용자는 포인트를 사용하지 않을 수 있으며, 필요시 계정을 삭제할 수 있습니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              '제 10 조 (기타)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '1. 이 약관에 명시되지 않은 사항은 관련 법령 및 회사의 정책에 따릅니다.\n'
+                  '2. 이 약관의 해석 및 적용에 관한 사항은 대한민국 법률에 따르며, 분쟁 발생 시 회사의 본사 소재지를 관할하는 법원에서 해결합니다.\n'
+                  '3. 이 약관은 시행일부터 시행됩니다.',
+              textAlign: TextAlign.justify,
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        );
+
       default:
         return Text('해당 제목에 대한 내용이 없습니다.');
     }
