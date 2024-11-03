@@ -43,16 +43,7 @@ class _OrderListState extends State<OrderList> {
     return Scaffold(
       appBar: AppBar(
         title: Text('주문 내역', style: TextStyle(fontFamily: 'NanumSquare',)),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back), // 백 버튼 아이콘 사용
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-                  (route) => false,
-            );
-          },
-        ),
+        leading: BackButton(),
       ),
       body: Column(
         children: [
