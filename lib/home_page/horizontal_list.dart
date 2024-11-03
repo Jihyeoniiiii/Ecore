@@ -119,13 +119,9 @@ class HorizontalListSection extends StatelessWidget {
                               ],
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Text(
-                                post.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 14),
-                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 0.0, horizontal: 4.0),
+                              child: PriceDisplay(price: post.price, fontSize: 17),
                             ),
                             // Firestore에서 마켓 이름 가져오기
                             StreamBuilder<DocumentSnapshot>(
@@ -162,9 +158,13 @@ class HorizontalListSection extends StatelessWidget {
                               },
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 0.0, horizontal: 4.0),
-                              child: PriceDisplay(price: post.price, fontSize: 20),
+                              padding: const EdgeInsets.all(4.0),
+                              child: Text(
+                                post.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 14, color: Colors.black54),
+                              ),
                             ),
                           ],
                         ),
