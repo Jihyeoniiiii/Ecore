@@ -59,7 +59,7 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('포인트 내역'),
+        title: Text('포인트 내역', style: TextStyle(fontFamily: 'NanumSquare',)),
       ),
       body: Column(
         children: [

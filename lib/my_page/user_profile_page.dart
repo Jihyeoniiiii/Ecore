@@ -16,7 +16,7 @@ class UserProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('프로필'),
+        title: Text('프로필', style: TextStyle(fontFamily: 'NanumSquare',)),
         centerTitle: true, // 앱바 제목 중앙 배치
       ),
       body: SingleChildScrollView(

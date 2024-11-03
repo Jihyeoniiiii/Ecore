@@ -23,7 +23,7 @@ class _OrderListState extends State<OrderList> {
     if (user == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('주문 내역'),
+          title: Text('주문 내역', style: TextStyle(fontFamily: 'NanumSquare',)),
           leading: BackButton(),
         ),
         body: Center(child: Text('User not logged in')),
@@ -32,7 +32,7 @@ class _OrderListState extends State<OrderList> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('주문 내역'),
+        title: Text('주문 내역', style: TextStyle(fontFamily: 'NanumSquare',)),
         leading: BackButton(),
       ),
       body: Column(

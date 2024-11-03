@@ -94,7 +94,7 @@ class _MyReviewPageState extends State<MyReviewPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('내 리뷰'),
+        title: Text('내 리뷰', style: TextStyle(fontFamily: 'NanumSquare',)),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _reviewsFuture,
