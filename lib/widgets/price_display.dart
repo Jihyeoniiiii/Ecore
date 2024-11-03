@@ -15,7 +15,7 @@ class PriceDisplay extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
       child: Text(
-        '$formattedPrice원', // 쉼표가 들어간 숫자 표시
+        '$formattedPrice', // 쉼표가 들어간 숫자 표시
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: fontSize, // 전달받은 fontSize 사용

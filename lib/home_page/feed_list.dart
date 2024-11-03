@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/firestore/sell_post_model.dart';
 import '../models/firestore/user_model.dart';
+import '../widgets/price_display.dart';
 import '../widgets/sold_out.dart';
 import 'category_button.dart';
 import 'feed_detail.dart';
@@ -176,15 +177,8 @@ class _SellListState extends State<SellList> {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  sellPost.title, // 제목
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
-                  maxLines: 1, // 제목이 한 줄을 넘어가면 생략
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: PriceDisplay(
+                    price: sellPost.price),
               ),
               PopupMenuButton<String>(
                 onSelected: (String value) {
@@ -240,13 +234,12 @@ class _SellListState extends State<SellList> {
             },
           ),
           Text(
-            '${sellPost.price}원', // 가격
+            sellPost.title, // 제목
             style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              fontSize: 14,
+              color: Colors.black54,
             ),
-            maxLines: 1,
+            maxLines: 1, // 제목이 한 줄을 넘어가면 생략
             overflow: TextOverflow.ellipsis,
           ),
         ],
