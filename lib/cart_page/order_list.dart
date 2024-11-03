@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+import '../home_page/home_page_menu.dart';
 import '../my_page/create_review_page.dart';
 import 'order_detail_page.dart';
 
@@ -24,7 +25,16 @@ class _OrderListState extends State<OrderList> {
       return Scaffold(
         appBar: AppBar(
           title: Text('주문 내역', style: TextStyle(fontFamily: 'NanumSquare',)),
-          leading: BackButton(),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back), // 백 버튼 아이콘 사용
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+                    (route) => false,
+              );
+            },
+          ),
         ),
         body: Center(child: Text('User not logged in')),
       );
@@ -33,7 +43,16 @@ class _OrderListState extends State<OrderList> {
     return Scaffold(
       appBar: AppBar(
         title: Text('주문 내역', style: TextStyle(fontFamily: 'NanumSquare',)),
-        leading: BackButton(),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back), // 백 버튼 아이콘 사용
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+                  (route) => false,
+            );
+          },
+        ),
       ),
       body: Column(
         children: [
