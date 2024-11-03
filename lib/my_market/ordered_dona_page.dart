@@ -132,6 +132,7 @@ class _OrderedDonaPageState extends State<OrderedDonaPage> {
     String title = order['title'] ?? '제목 없음';
     String paymentMethod = order['paymentMethod'] ?? '결제 방법 없음';
     String username = order['username'] ?? 'Unknown';
+    String userId = order['userId'] ?? ''; // 추가된 부분
     Map<String, dynamic> data = order.data() as Map<String, dynamic>;
 
     String donaImageUrl = (data['donaImg'] != null && data['donaImg'].isNotEmpty)
@@ -214,6 +215,8 @@ class _OrderedDonaPageState extends State<OrderedDonaPage> {
                               itemImg: donaImageUrl,
                               itemPrice: data['price'] ?? 0,
                               marketId: widget.marketId,
+                              userId: userId, // 추가된 부분
+
                             ),
                           ),
                         );

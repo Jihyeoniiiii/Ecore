@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../home_page/home_page_menu.dart';
 
 class CreateDonaReview extends StatefulWidget {
@@ -10,6 +9,7 @@ class CreateDonaReview extends StatefulWidget {
   final String itemImg;
   final int itemPrice;
   final String marketId;
+  final String userId; // 추가: 사용자 ID
 
   const CreateDonaReview({
     Key? key,
@@ -19,6 +19,7 @@ class CreateDonaReview extends StatefulWidget {
     required this.itemImg,
     required this.itemPrice,
     required this.marketId,
+    required this.userId, // 추가: 사용자 ID
   }) : super(key: key);
 
   @override
@@ -194,7 +195,7 @@ class _CreateReviewState extends State<CreateDonaReview> {
       'satisfaction': satisfaction,
       'rating': rating,
       'timestamp': FieldValue.serverTimestamp(),
-      'userId': user.uid,
+      'userId': widget.userId, // 수정된 부분: 전달받은 userId 저장
       'orderId': widget.orderId,
       'itemIndex': widget.itemIndex,
       'itemTitle': widget.itemTitle,
@@ -203,13 +204,11 @@ class _CreateReviewState extends State<CreateDonaReview> {
     };
 
     try {
-      // Add review data to Firestore
       await FirebaseFirestore.instance.collection('Reviews').add(reviewData);
 
-      // Fetch the item document ID using a query
       final itemsSnapshot = await FirebaseFirestore.instance
           .collection('Users')
-          .doc(user.uid)
+          .doc(widget.userId) // 수정된 부분: 전달받은 userId 사용
           .collection('Orders')
           .doc(widget.orderId)
           .collection('items')
@@ -218,7 +217,6 @@ class _CreateReviewState extends State<CreateDonaReview> {
           .get();
 
       if (itemsSnapshot.docs.isNotEmpty) {
-        // Assuming there's only one document matching the query
         final itemDoc = itemsSnapshot.docs.first;
         await itemDoc.reference.update({'reviewed': true});
       } else {
@@ -228,7 +226,7 @@ class _CreateReviewState extends State<CreateDonaReview> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
-            (route) => false,  // 모든 기존 페이지를 제거하고 새로운 페이지로 이동
+            (route) => false,
       );
     } catch (error) {
       print('Error updating reviewed status: $error');
