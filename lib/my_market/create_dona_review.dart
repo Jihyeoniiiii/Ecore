@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../home_page/home_page_menu.dart';
 
 class CreateDonaReview extends StatefulWidget {
@@ -39,7 +40,7 @@ class _CreateReviewState extends State<CreateDonaReview> {
       appBar: AppBar(
         title: Text('리뷰 작성'),
       ),
-      body: SingleChildScrollView( // 수정: 스크롤 가능하게 만들기
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -47,13 +48,13 @@ class _CreateReviewState extends State<CreateDonaReview> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildItemInfo(), // 상품 정보 표시
+                _buildItemInfo(),
                 SizedBox(height: 16),
                 Text('구매하신 상품은 만족하시나요?', style: TextStyle(fontSize: 16)),
-                _buildSatisfactionRadio(), // 만족도 선택
+                _buildSatisfactionRadio(),
                 SizedBox(height: 16),
                 Text('별점', style: TextStyle(fontSize: 16)),
-                _buildStarRating(), // 별점 선택
+                _buildStarRating(),
                 SizedBox(height: 16),
                 TextFormField(
                   controller: _reviewController,
@@ -98,7 +99,7 @@ class _CreateReviewState extends State<CreateDonaReview> {
             height: 80,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              return Image.asset('assets/images/placeholder.png'); // 대체 이미지
+              return Image.asset('assets/images/placeholder.png');
             },
           ),
         ),
@@ -182,13 +183,6 @@ class _CreateReviewState extends State<CreateDonaReview> {
     }
 
     final reviewText = _reviewController.text;
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('로그인되지 않았습니다.')),
-      );
-      return;
-    }
 
     final reviewData = {
       'review': reviewText,
@@ -200,7 +194,7 @@ class _CreateReviewState extends State<CreateDonaReview> {
       'itemIndex': widget.itemIndex,
       'itemTitle': widget.itemTitle,
       'marketId': widget.marketId,
-      'bySeller_review': 'true', // 새 필드 추가
+      'byseller_review': 'true',
     };
 
     try {
