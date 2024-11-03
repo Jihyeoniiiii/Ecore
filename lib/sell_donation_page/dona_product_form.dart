@@ -35,7 +35,7 @@ class _DonaProductFormState extends State<DonaProductForm> {
   int? _points;
   String? _selectedCondition = 'S';
   String? _condition = ''; // AI-processed condition display
-  String _serverUrl = 'http://192.168.0.5:8088/upload';
+  String _serverUrl = 'http://1.235.3.54:8088/upload';
 
   Future<void> getSingleImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
