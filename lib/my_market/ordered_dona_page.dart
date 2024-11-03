@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import '../my_page/create_review_page.dart';
+import 'create_dona_review.dart';
 
 class OrderedDonaPage extends StatefulWidget {
   final String marketId;
@@ -132,6 +132,7 @@ class _OrderedDonaPageState extends State<OrderedDonaPage> {
     String title = order['title'] ?? '제목 없음';
     String paymentMethod = order['paymentMethod'] ?? '결제 방법 없음';
     String username = order['username'] ?? 'Unknown';
+    String userId = order['userId'] ?? ''; // 추가된 부분
     Map<String, dynamic> data = order.data() as Map<String, dynamic>;
 
     String donaImageUrl = (data['donaImg'] != null && data['donaImg'].isNotEmpty)
@@ -207,13 +208,15 @@ class _OrderedDonaPageState extends State<OrderedDonaPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CreateReview(
+                            builder: (context) => CreateDonaReview(
                               orderId: order.id,
                               itemIndex: 0,
                               itemTitle: title,
                               itemImg: donaImageUrl,
                               itemPrice: data['price'] ?? 0,
                               marketId: widget.marketId,
+                              userId: userId, // 추가된 부분
+
                             ),
                           ),
                         );

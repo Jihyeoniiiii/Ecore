@@ -3,15 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../home_page/home_page_menu.dart';
 
-class CreateReview extends StatefulWidget {
+class CreateDonaReview extends StatefulWidget {
   final String orderId;
   final int itemIndex;
   final String itemTitle;
   final String itemImg;
   final int itemPrice;
   final String marketId;
+  final String userId; // 추가: 사용자 ID
 
-  const CreateReview({
+  const CreateDonaReview({
     Key? key,
     required this.orderId,
     required this.itemIndex,
@@ -19,13 +20,14 @@ class CreateReview extends StatefulWidget {
     required this.itemImg,
     required this.itemPrice,
     required this.marketId,
+    required this.userId, // 추가: 사용자 ID
   }) : super(key: key);
 
   @override
   _CreateReviewState createState() => _CreateReviewState();
 }
 
-class _CreateReviewState extends State<CreateReview> {
+class _CreateReviewState extends State<CreateDonaReview> {
   final TextEditingController _reviewController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -38,7 +40,7 @@ class _CreateReviewState extends State<CreateReview> {
       appBar: AppBar(
         title: Text('리뷰 작성'),
       ),
-      body: SingleChildScrollView( // 수정: 스크롤 가능하게 만들기
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -46,13 +48,13 @@ class _CreateReviewState extends State<CreateReview> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildItemInfo(), // 상품 정보 표시
+                _buildItemInfo(),
                 SizedBox(height: 16),
                 Text('구매하신 상품은 만족하시나요?', style: TextStyle(fontSize: 16)),
-                _buildSatisfactionRadio(), // 만족도 선택
+                _buildSatisfactionRadio(),
                 SizedBox(height: 16),
                 Text('별점', style: TextStyle(fontSize: 16)),
-                _buildStarRating(), // 별점 선택
+                _buildStarRating(),
                 SizedBox(height: 16),
                 TextFormField(
                   controller: _reviewController,
@@ -97,7 +99,7 @@ class _CreateReviewState extends State<CreateReview> {
             height: 80,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              return Image.asset('assets/images/placeholder.png'); // 대체 이미지
+              return Image.asset('assets/images/placeholder.png');
             },
           ),
         ),
@@ -181,35 +183,26 @@ class _CreateReviewState extends State<CreateReview> {
     }
 
     final reviewText = _reviewController.text;
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('로그인되지 않았습니다.')),
-      );
-      return;
-    }
 
     final reviewData = {
       'review': reviewText,
       'satisfaction': satisfaction,
       'rating': rating,
       'timestamp': FieldValue.serverTimestamp(),
-      'userId': user.uid,
+      'userId': widget.userId, // 수정된 부분: 전달받은 userId 저장
       'orderId': widget.orderId,
       'itemIndex': widget.itemIndex,
       'itemTitle': widget.itemTitle,
       'marketId': widget.marketId,
-      'byseller_review': 'false', // 새 필드 추가
+      'byseller_review': 'true',
     };
 
     try {
-      // Add review data to Firestore
       await FirebaseFirestore.instance.collection('Reviews').add(reviewData);
 
-      // Fetch the item document ID using a query
       final itemsSnapshot = await FirebaseFirestore.instance
           .collection('Users')
-          .doc(user.uid)
+          .doc(widget.userId) // 수정된 부분: 전달받은 userId 사용
           .collection('Orders')
           .doc(widget.orderId)
           .collection('items')
@@ -218,7 +211,6 @@ class _CreateReviewState extends State<CreateReview> {
           .get();
 
       if (itemsSnapshot.docs.isNotEmpty) {
-        // Assuming there's only one document matching the query
         final itemDoc = itemsSnapshot.docs.first;
         await itemDoc.reference.update({'reviewed': true});
       } else {
@@ -228,7 +220,7 @@ class _CreateReviewState extends State<CreateReview> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
-            (route) => false,  // 모든 기존 페이지를 제거하고 새로운 페이지로 이동
+            (route) => false,
       );
     } catch (error) {
       print('Error updating reviewed status: $error');
