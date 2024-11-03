@@ -173,10 +173,10 @@ class _PayPageState extends State<PayPage> {
       for (var item in widget.cartItems) {
         // 구매자의 marketId 가져오기
         final buyerDoc = await FirebaseFirestore.instance.collection('Users').doc(user!.uid).get();
-        buyerMarketId = buyerDoc['marketId'] ?? ''; // null 처리
-        if (buyerMarketId.isEmpty) {
-          throw Exception('Buyer marketId not found');
-        }
+        // buyerMarketId = buyerDoc['marketId'] ?? ''; // null 처리
+        // if (buyerMarketId.isEmpty) {
+        //   throw Exception('Buyer marketId not found');
+        // }
 
         // 기부글 구매 시 DonaOrders에 추가
         if (item['donaId'] != null) {
@@ -243,7 +243,7 @@ class _PayPageState extends State<PayPage> {
 
 
         // 판매글 구매 시
-        if (item['sellId'] != null && buyerMarketId.isNotEmpty) {
+        if (item['sellId'] != null) {
           // Users/{userId}/Orders에 판매글 구매 내역 저장
           DocumentReference userOrderRef = await FirebaseFirestore.instance
               .collection('Users')
@@ -302,6 +302,24 @@ class _PayPageState extends State<PayPage> {
             'stock': FieldValue.increment(-1), // 재고 감소
           });
         }
+
+        final sellOrderRef = FirebaseFirestore.instance
+            .collection('Markets')
+            .doc(item['marketId'])
+            .collection('SellOrders');
+
+        await sellOrderRef.add({
+          'userId': user!.uid, // 구매자 ID
+          'username': username, // 구매자 username 추가
+          'sellId': item['sellId'], // 판매글 ID
+          'title': item['title'], // 상품명
+          'price': item['price'], // 가격
+          'date': FieldValue.serverTimestamp(), // 주문 날짜
+          'paymentMethod': _selectedPaymentMethod, // 결제 방법
+          'shippingStatus': '배송 준비', // 배송 상태
+          'quantity': item['quantity'] ?? 1, // 구매 수량 (기본값 1)
+          'sellImg': item['img'], // 상품 이미지 추가
+        });
       }
 
       // 포인트 사용 처리 (사용된 포인트 차감 및 기록)
