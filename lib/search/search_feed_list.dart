@@ -5,6 +5,7 @@ import '../donation_page/dona_detail.dart';
 import '../home_page/feed_detail.dart';
 import '../models/firestore/dona_post_model.dart';
 import '../models/firestore/sell_post_model.dart';
+import '../widgets/price_display.dart';
 
 Widget SearchFeedList(Map<String, dynamic> result, bool _isDonationSearch, BuildContext context) {
   // Use the first image in the list or a placeholder
@@ -14,12 +15,13 @@ Widget SearchFeedList(Map<String, dynamic> result, bool _isDonationSearch, Build
 
   return InkWell(
     onTap: () {
+      final docId = result['id'];
+      if (docId == null || docId.isEmpty) {
+        print('Document ID is null or empty');
+        return;
+      }
+
       if (_isDonationSearch) {
-        final docId = result['id'];
-        if (docId == null || docId.isEmpty) {
-          print('Document ID is null or empty');
-          return;
-        }
         final donaPostReference = FirebaseFirestore.instance.collection('DonaPosts').doc(docId);
         final donaPost = DonaPostModel.fromMap(result, '', reference: donaPostReference);
 
@@ -30,11 +32,6 @@ Widget SearchFeedList(Map<String, dynamic> result, bool _isDonationSearch, Build
           ),
         );
       } else {
-        final docId = result['id'];
-        if (docId == null || docId.isEmpty) {
-          print('Document ID is null or empty');
-          return;
-        }
         final sellPostReference = FirebaseFirestore.instance.collection('SellPosts').doc(docId);
         final sellPost = SellPostModel.fromMap(result, '', reference: sellPostReference);
 
@@ -50,12 +47,15 @@ Widget SearchFeedList(Map<String, dynamic> result, bool _isDonationSearch, Build
       children: [
         Padding(
           padding: const EdgeInsets.all(15.0),
-          child: CachedNetworkImage(
-            imageUrl: imageUrl,
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-            errorWidget: (context, url, error) => Icon(Icons.error),
+          child: ClipRRect( // 모서리 둥글게 만들기
+            borderRadius: BorderRadius.circular(10), // 원하는 둥글기 설정
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            ),
           ),
         ),
         SizedBox(width: 10.0),
@@ -67,15 +67,8 @@ Widget SearchFeedList(Map<String, dynamic> result, bool _isDonationSearch, Build
                 result['title'] ?? 'No Title',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black87),
               ),
-              Text(
-                result['body'] ?? 'No Description',
-                style: TextStyle(fontSize: 16),
-              ),
               if (!_isDonationSearch)
-                Text(
-                  '${result['price'] ?? 'No Price'}원',
-                  style: TextStyle(fontSize: 20, color: Colors.black87),
-                ),
+                  PriceDisplay(price: result['price'].toInt(),fontSize: 18),
             ],
           ),
         ),

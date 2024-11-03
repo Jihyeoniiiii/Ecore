@@ -13,6 +13,14 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
   String _filter = 'all'; // 초기 필터: 전체
   int userPoints = 0; // 보유 포인트
 
+  // 튜토리얼 이미지 목록
+  final List<String> _tutorialImages = [
+    'assets/images/points/001.png',
+    'assets/images/points/002.png',
+    'assets/images/points/003.png',
+    'assets/images/points/004.png',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -57,12 +65,38 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '보유 포인트: $userPoints P',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24, // 글씨 크기를 약간 키움
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '보유 포인트: $userPoints P',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24, // 글씨 크기를 약간 키움
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    // 포인트 이용 약관 페이지로 이동 또는 알림
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('포인트 이용 약관 페이지로 이동합니다.')),
+                    );
+                  },
+                  child: Text(
+                    '포인트 이용 약관',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _showTutorial,
+                  child: Text('포인트 안내 보기 >'),
+                ),
+              ],
             ),
           ),
           // 필터 버튼
@@ -158,6 +192,24 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
     );
   }
 
+  // 포인트 튜토리얼을 보여주는 함수
+  void _showTutorial() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.5), // 배경을 반투명하게 설정
+      builder: (context) {
+        return Center(
+          child: Container(
+            width: 300,
+            height: 400,
+            child: TutorialPage(tutorialImages: _tutorialImages),
+          ),
+        );
+      },
+    );
+  }
+
+
   // 필터 버튼 생성
   ElevatedButton _buildFilterButton(String label, String value) {
     return ElevatedButton(
@@ -174,6 +226,75 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12), // 버튼 크기 조절
       ),
       child: Text(label),
+    );
+  }
+}
+
+class TutorialPage extends StatefulWidget {
+  final List<String> tutorialImages;
+
+  TutorialPage({required this.tutorialImages});
+
+  @override
+  _TutorialPageState createState() => _TutorialPageState();
+}
+
+class _TutorialPageState extends State<TutorialPage> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: Image.asset(
+                  widget.tutorialImages[_currentIndex],
+                  width: 300, // 원하는 이미지 너비
+                  height: 400, // 원하는 이미지 높이
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ],
+        ),
+        // 닫기 버튼 (상단 오른쪽, 흰색 X)
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IconButton(
+            icon: Icon(Icons.close, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).pop(); // 팝업 닫기
+            },
+          ),
+        ),
+        // 다음 화살표 버튼 (사진의 오른쪽 하단, 흰색 `>` 텍스트)
+        Positioned(
+          bottom: 24,
+          right: 24,
+          child: GestureDetector(
+            onTap: _currentIndex < widget.tutorialImages.length - 1
+                ? () {
+              setState(() {
+                _currentIndex++;
+              });
+            }
+                : null, // 마지막 이미지일 때 비활성화
+            child: Text(
+              '>',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

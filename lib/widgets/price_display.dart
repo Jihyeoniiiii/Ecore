@@ -3,8 +3,9 @@ import 'package:intl/intl.dart';
 
 class PriceDisplay extends StatelessWidget {
   final int price;
+  final double fontSize; // 추가된 매개변수
 
-  PriceDisplay({required this.price});
+  PriceDisplay({required this.price, this.fontSize = 14}); // 기본값은 14
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +15,10 @@ class PriceDisplay extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
       child: Text(
-        '$formattedPrice', // 쉼표가 들어간 숫자 표시
+        '$formattedPrice원', // 쉼표가 들어간 숫자 표시
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 17,
+          fontSize: fontSize, // 전달받은 fontSize 사용
         ),
       ),
     );
