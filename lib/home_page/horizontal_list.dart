@@ -7,6 +7,7 @@ import 'feed_detail.dart';
 import 'feed_list.dart';
 import '../widgets/sold_out.dart'; // SoldOutOverlay 위젯 임포트
 import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore 임포트
+
 class HorizontalListSection extends StatelessWidget {
   final Stream<List<SellPostModel>> stream;
   final String title;
@@ -73,8 +74,7 @@ class HorizontalListSection extends StatelessWidget {
                   );
                 }
 
-                final items =
-                snapshot.data!.take(6).toList(); // Limit to 6 items
+                final items = snapshot.data!.take(6).toList(); // Limit to 6 items
 
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -127,7 +127,7 @@ class HorizontalListSection extends StatelessWidget {
                             // 가격 표시 (PriceDisplay 위젯)
                             Padding(
                               padding: const EdgeInsets.symmetric(
-                                  vertical: 2.0, horizontal: 4.0),
+                                  vertical: 1.0, horizontal: 4.0), // 간격 축소
                               child: PriceDisplay(
                                   price: post.price), // PriceDisplay 위젯 사용
                             ),
@@ -155,11 +155,11 @@ class HorizontalListSection extends StatelessWidget {
 
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      vertical: 1.0, horizontal: 4.0),
+                                      vertical: 0.5, horizontal: 4.0), // 간격 축소
                                   child: Text(
                                     marketName, // Firestore에서 가져온 마켓 이름 표시
                                     style: TextStyle(
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         color: Colors.black54), // 스타일 조정 가능
                                   ),
                                 );
@@ -167,12 +167,14 @@ class HorizontalListSection extends StatelessWidget {
                             ),
                             // 상품 타이틀 표시
                             Padding(
-                              padding: const EdgeInsets.all(4.0),
+                              padding: const EdgeInsets.only(
+                                  left: 4.0, right: 4.0, top: 1.0), // 간격 축소
                               child: Text(
                                 post.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.black54),
                               ),
                             ),
                           ],
