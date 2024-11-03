@@ -105,7 +105,7 @@ class _TitleBannerState extends State<TitleBanner> {
                 title: Row(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0, bottom: 0.0), // 왼쪽 여백 추가
+                      padding: const EdgeInsets.only(left: 8.0, bottom: 0.0), // 왼쪽 여백 추가
                       child: Text(
                         '믿고 거래하는 에코리 상품',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // 스타일 설정
@@ -136,7 +136,7 @@ class _TitleBannerState extends State<TitleBanner> {
               HorizontalListSection(
                 stream: userModel.recentlyViewedStream,
                 title: Padding( // Padding 추가
-                  padding: const EdgeInsets.only(left: 16.0), // 왼쪽 여백 추가
+                  padding: const EdgeInsets.only(left: 8.0), // 왼쪽 여백 추가
                   child: Text(
                     '최근 본 상품',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -154,7 +154,7 @@ class _TitleBannerState extends State<TitleBanner> {
               HorizontalListSection(
                 stream: userModel.favoriteListStream,
                 title: Padding( // Padding 추가
-                  padding: const EdgeInsets.only(left: 16.0), // 왼쪽 여백 추가
+                  padding: const EdgeInsets.only(left: 8.0), // 왼쪽 여백 추가
                   child: Text(
                     '찜한 상품',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

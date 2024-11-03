@@ -41,14 +41,6 @@ class _DonaDetailState extends State<DonaDetail> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(55.0),
         child: AppBar(
-          //backgroundColor: baseColor,
-          title: Text(
-            "주문",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           titleSpacing: 0, // title과 leading 사이의 기본 간격을 제거
         ),
       ),

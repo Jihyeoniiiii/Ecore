@@ -16,7 +16,7 @@ class UserProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('프로필'),
+        title: Text('프로필', style: TextStyle(fontFamily: 'NanumSquare',)),
         centerTitle: true, // 앱바 제목 중앙 배치
       ),
       body: SingleChildScrollView(
@@ -240,7 +240,7 @@ class UserProfilePage extends StatelessWidget {
               stream: FirebaseFirestore.instance
                   .collection('Reviews')
                   .where('userId', isEqualTo: userId) // 해당 userId의 리뷰들 가져오기
-                  .where('byseller_review', isEqualTo : 'false')
+                  .where('byseller_review', isEqualTo : 'true')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

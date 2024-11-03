@@ -200,7 +200,7 @@ class _ChatRoomState extends State<ChatRoom> {
               final productData = snapshot.data ?? {};
               final imageUrl = productData['img'][0] ?? ''; // 이미지 URL
               final title = productData['title'] ?? '상품 제목 없음'; // 상품 제목
-              final price = productData['price'] ?? 0; // 상품 가격
+              final price = (productData['price'] as num?)?.toInt() ?? 0;
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),

@@ -245,7 +245,9 @@ class _DonaProductFormState extends State<DonaProductForm> {
           child: ListView(
             children: <Widget>[
               // AI image section
+              // AI image section
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start, // 위쪽 정렬
                 children: <Widget>[
                   GestureDetector(
                     onTap: getSingleImage,
@@ -262,12 +264,23 @@ class _DonaProductFormState extends State<DonaProductForm> {
                     ),
                   ),
                   SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: uploadSingleImage,
-                    child: Text('포인트 측정하기'),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ElevatedButton(
+                          onPressed: uploadSingleImage,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 48), // 버튼을 가로로 길게
+                          ),
+                          child: Text('포인트 측정하기'),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
+
               if (_imageData != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
