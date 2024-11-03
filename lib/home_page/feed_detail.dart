@@ -164,11 +164,6 @@ class _FeedDetailState extends State<FeedDetail> {
           .collection('DonaList')
           .get();
 
-      if (donaListSnapshot.docs.isEmpty) {
-        print('DonaList에 데이터가 없습니다.');
-        return [];
-      }
-
       List<String> donaImages = donaListSnapshot.docs
           .map((doc) => doc['donaImg'][0] as String)
           .toList();
@@ -453,11 +448,11 @@ class _FeedDetailState extends State<FeedDetail> {
                 ),
                 if (businessNumber.isNotEmpty) // 비즈니스 넘버가 존재할 때 체크 아이콘 추가
                   Padding(
-                    padding: const EdgeInsets.only(left: 4.0, top: 3.0), // 아이콘과 텍스트 간격 조절
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Colors.blue, // 체크 아이콘 색상 설정
-                      size: 18, // 아이콘 크기 설정
+                    padding: const EdgeInsets.only(left: 3.0,), // 아이콘과 텍스트 간격 조절
+                    child: Image.asset(
+                      'assets/images/ecore_2_logo.png', // 로고 이미지 파일 경로
+                      width: 30, // 이미지의 너비
+                      height: 30, // 이미지의 높이
                     ),
                   ),
               ],
