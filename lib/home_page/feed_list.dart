@@ -1,4 +1,3 @@
-import 'package:ecore/widgets/price_display.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -152,22 +151,11 @@ class _SellListState extends State<SellList> {
                     top: -1,
                     right: -4,
                     child: IconButton(
-                      icon: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(
-                            Icons.favorite,
-                            color: Colors.black.withOpacity(0.2),
-                            size: 24,
-                          ),
-                          Icon(
-                            isFavorite ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorite ? Colors.red : Colors.white,
-                            size: 24,
-                          ),
-                        ],
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.white,
                       ),
-                        onPressed: () => _toggleFavorite(sellPost, isFavorite),
+                      onPressed: () => _toggleFavorite(sellPost, isFavorite), // 하트 클릭 시 동작 추가
                     ),
                   );
                 },
@@ -201,10 +189,15 @@ class _SellListState extends State<SellList> {
                     ),
                   ];
                 },
-                child: Icon(
-                  Icons.more_vert,
-                  size: 20,
-                  color: Colors.grey,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    '...',
+                    style: TextStyle(
+                      fontSize: 20, // 가격과 비슷한 크기
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -234,7 +227,15 @@ class _SellListState extends State<SellList> {
               );
             },
           ),
-          PriceDisplay(price: sellPost.price, fontSize:15)
+          Text(
+            sellPost.title, // 제목
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+            ),
+            maxLines: 1, // 제목이 한 줄을 넘어가면 생략
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
