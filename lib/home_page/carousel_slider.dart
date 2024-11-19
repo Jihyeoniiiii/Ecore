@@ -18,16 +18,14 @@ class _CareouselSliderState extends State<CareouselSlider> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
         CarouselSlider.builder(
           itemCount: imgList.length,
           itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) =>
-              Container(
-                child: Image.asset(
-                  imgList[itemIndex],
-                  fit: BoxFit.cover, // 이미지를 꽉 차게 보여줍니다.
-                ),
+              Image.asset(
+                imgList[itemIndex],
+                fit: BoxFit.cover, // 이미지를 꽉 차게 보여줍니다.
               ),
           options: CarouselOptions(
             height: 250,
@@ -44,28 +42,23 @@ class _CareouselSliderState extends State<CareouselSlider> {
             viewportFraction: 1.0, // 화면을 가득 채우도록 설정
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: imgList.asMap().entries.map((entry) {
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _currentIndex = entry.key; // 현재 인덱스를 업데이트합니다.
-                });
-              },
-              child: Container(
-                width: 12.0,
-                height: 12.0,
-                margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _currentIndex == entry.key
-                      ? Colors.blueAccent
-                      : Colors.grey,
-                ),
+        Positioned(
+          bottom: 10,
+          right: 10,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '${_currentIndex + 1}/${imgList.length}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
               ),
-            );
-          }).toList(),
+            ),
+          ),
         ),
       ],
     );

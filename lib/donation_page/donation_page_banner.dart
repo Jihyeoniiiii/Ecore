@@ -45,7 +45,7 @@ class _DonationBannerState extends State<DonationBanner> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 20),
+            padding: const EdgeInsets.only(right: 12),
             child: _buildSortDropdown(), // 정렬 옵션 드롭다운
           ),
           IconButton(
@@ -59,9 +59,12 @@ class _DonationBannerState extends State<DonationBanner> {
                 ),
               );
             },
-            icon: Icon(
-              CupertinoIcons.search,
-              color: Colors.blueGrey,
+            icon: Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: Icon(
+                CupertinoIcons.search,
+                color: Colors.blueGrey,
+              ),
             ),
           ),
         ],

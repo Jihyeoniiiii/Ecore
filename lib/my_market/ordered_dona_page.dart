@@ -1,8 +1,9 @@
+import 'package:ecore/cosntants/common_color.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import '../my_page/create_review_page.dart';
+import 'create_dona_review.dart';
 
 class OrderedDonaPage extends StatefulWidget {
   final String marketId;
@@ -131,16 +132,11 @@ class _OrderedDonaPageState extends State<OrderedDonaPage> {
     String title = order['title'] ?? '제목 없음';
     String paymentMethod = order['paymentMethod'] ?? '결제 방법 없음';
     String username = order['username'] ?? 'Unknown';
+    String userId = order['userId'] ?? ''; // 추가된 부분
     Map<String, dynamic> data = order.data() as Map<String, dynamic>;
 
-    // 리뷰 여부 확인 (리뷰가 작성되었는지 여부를 확인하는 필드 추가)
-    bool isReviewed = data['isReviewed'] ?? false;
-
-    List<String>? donaImages = data.containsKey('donaImg')
-        ? List<String>.from(data['donaImg'])
-        : null;
-    String donaImageUrl = donaImages != null && donaImages.isNotEmpty
-        ? donaImages[0]
+    String donaImageUrl = (data['donaImg'] != null && data['donaImg'].isNotEmpty)
+        ? data['donaImg'][0]
         : 'https://via.placeholder.com/100';
 
     return Padding(
@@ -153,56 +149,79 @@ class _OrderedDonaPageState extends State<OrderedDonaPage> {
         elevation: 3,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    donaImageUrl,
-                    height: 100,
-                    width: 100,
-                    fit: BoxFit.cover,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _buildImage(donaImageUrl),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        const SizedBox(height: 8),
+                        Text(paymentMethod, style: const TextStyle(fontSize: 12)),
+                        const SizedBox(height: 8),
+                        Text('기부자: $username', style: const TextStyle(fontSize: 12)),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      const SizedBox(height: 8),
-                      Text(paymentMethod, style: const TextStyle(fontSize: 12)),
-                      const SizedBox(height: 8),
-                      Text('기부자: $username', style: const TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 20),
-                if (!isReviewed) // 리뷰가 작성되지 않은 경우에만 버튼을 표시
-                  Padding(
-                    padding: const EdgeInsets.only(right: 5.0),
-                    child: ElevatedButton(
+                ],
+              ),
+              const SizedBox(height: 20),
+              FutureBuilder<QuerySnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('Reviews')
+                    .where('orderId', isEqualTo: order.id)
+                    .where('itemTitle', isEqualTo: title)
+                    .get(),
+                builder: (context, snapshot) {
+                  // 로딩 상태일 때 로딩 스피너를 표시
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // 리뷰 존재 여부 확인
+                  bool hasReview = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+
+                  return SizedBox(
+                    width: double.infinity, // 버튼을 카드의 너비에 맞춤
+                    child: hasReview
+                        ? ElevatedButton(
+                      onPressed: () {
+                        _showReviewDialog(snapshot.data!.docs.first);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        side: BorderSide(color: baseColor), // 버튼 테두리
+                      ),
+                      child: const Text(
+                        '작성된 리뷰 보기',
+                        style: TextStyle(color: Colors.black, fontSize: 12),
+                      ),
+                    )
+                        : ElevatedButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CreateReview(
-                              orderId: order.id, // 주문 ID 전달
-                              itemIndex: 0, // 예시로 0을 전달
+                            builder: (context) => CreateDonaReview(
+                              orderId: order.id,
+                              itemIndex: 0,
                               itemTitle: title,
                               itemImg: donaImageUrl,
                               itemPrice: data['price'] ?? 0,
                               marketId: widget.marketId,
+                              userId: userId, // 추가된 부분
+
                             ),
                           ),
                         );
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: const Text('리뷰 작성', style: TextStyle(fontSize: 12)),
-                      ),
+                      child: const Text('리뷰 작성', style: TextStyle(fontSize: 12)),
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.black,
                         backgroundColor: const Color.fromRGBO(230, 245, 220, 1.0),
@@ -212,14 +231,60 @@ class _OrderedDonaPageState extends State<OrderedDonaPage> {
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+
+  Widget _buildImage(String donaImageUrl) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8.0),
+      child: Image.network(
+        donaImageUrl,
+        height: 100,
+        width: 100,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  void _showReviewDialog(QueryDocumentSnapshot reviewDoc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('작성된 리뷰'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('만족도: ${reviewDoc['satisfaction']}'),
+              Text('별점: ${reviewDoc['rating']}'),
+              const SizedBox(height: 10),
+              Text('리뷰:'),
+              Text(reviewDoc['review']),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('닫기'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
 
   Padding _viewDate(String date, List<QueryDocumentSnapshot> ordersForDate) {
     return Padding(

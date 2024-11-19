@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart'; // 이미지 선택을 위한 임포트
 import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage를 위한 임포트
@@ -12,7 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage를 
 import '../home_page/home_page_menu.dart';
 import '../models/firestore/market_model.dart';
 import 'business_check.dart';
-import 'my_market_banner.dart';
+import 'package:ecore/home_page/home_page_menu.dart';
 
 class MarketInfoPage extends StatefulWidget {
   final String seller_name;
@@ -47,6 +45,15 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
   String? _profileImageUrl;
   XFile? _image;
 
+  @override
+  void dispose() {
+    _marketNameController.dispose();
+    _marketDescriptionController.dispose();
+    _csPhoneController.dispose();
+    _csemailController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -79,15 +86,13 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
   }
 
   Future<void> _submitMarketInfo() async {
-    // 로딩 중 다이얼로그 표시
-    _showLoadingDialog();
+    _showLoadingDialog(); // 로딩 다이얼로그 표시
 
     if (_formKey.currentState?.validate() ?? false) {
       String marketName = _marketNameController.text;
       List<String> marketDescription = _marketDescriptionController.text.split('\n');
       String csPhone = _csPhoneController.text;
       String csemail = _csemailController.text;
-
       String? userId = FirebaseAuth.instance.currentUser?.uid;
 
       try {
@@ -96,7 +101,7 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
           'feedPosts': marketDescription,
           'cs_phone': csPhone,
           'cs_email': csemail,
-          'business_number': _businessNumber ?? '', // 사업자 번호 추가
+          'business_number': _businessNumber ?? '',
           'userId': userId,
           'seller_name': widget.seller_name,
           'dob': widget.dob,
@@ -112,11 +117,7 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
 
         if (_image != null) {
           await _uploadImage(marketId);
-
-          await FirebaseFirestore.instance
-              .collection('Markets')
-              .doc(marketId)
-              .update({
+          await FirebaseFirestore.instance.collection('Markets').doc(marketId).update({
             'img': _profileImageUrl,
           });
         }
@@ -127,33 +128,20 @@ class _MarketInfoPageState extends State<MarketInfoPage> {
           });
         }
 
-        DocumentSnapshot marketDoc = await FirebaseFirestore.instance
-            .collection('Markets')
-            .doc(marketId)
-            .get();
-        MarketModel market = MarketModel.fromSnapshot(marketDoc);
-
-        // 로딩 중 다이얼로그 닫기
-        Navigator.of(context).pop();
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
-              (route) => false,
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('마켓 정보가 제출되었습니다.')),
-        );
+        if (mounted) {
+          Navigator.of(context).pop();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+                (route) => false,
+          );
+        }
       } catch (e) {
-        // 로딩 중 다이얼로그 닫기
-        Navigator.of(context).pop();
-
+        if (mounted) Navigator.of(context).pop();
         print(e);
       }
     } else {
-      // 폼이 유효하지 않을 때 로딩 중 다이얼로그 닫기
-      Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop();
     }
   }
 

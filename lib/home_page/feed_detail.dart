@@ -8,6 +8,7 @@ import '../models/firestore/user_model.dart';
 import 'package:provider/provider.dart';
 import '../search/market_detail.dart';
 import '../chat_page/chat_banner.dart';
+import '../widgets/price_display.dart';
 import '../widgets/sold_out.dart';
 import '../widgets/view_counter.dart';
 
@@ -70,33 +71,43 @@ class _FeedDetailState extends State<FeedDetail> {
       return;
     }
 
-    final userRef = FirebaseFirestore.instance.collection('Users').doc(user.uid);
-    final userDoc = await userRef.get();
-    if (!userDoc.exists) {
-      // User document does not exist
-      print('User document does not exist');
-      return;
+    if(currentUserId != marketUserId) {
+      final userRef =
+      FirebaseFirestore.instance.collection('Users').doc(user.uid);
+      final userDoc = await userRef.get();
+      if (!userDoc.exists) {
+        // User document does not exist
+        print('User document does not exist');
+        return;
+      }
+
+      final cart = userDoc.data()?['cart'] ?? [];
+      final newCartItem = {
+        'sellId': widget.sellPost.sellId,
+        'title': widget.sellPost.title,
+        'img': widget.sellPost.img,
+        'price': widget.sellPost.price,
+        'category': widget.sellPost.category,
+        'body': widget.sellPost.body,
+        'marketId': widget.sellPost.marketId,
+        'marketName': marketName, // 추가: 마켓 이름 추가
+        'shippingFee': widget.sellPost.shippingFee,
+        'reference': widget.sellPost.reference.path,
+      };
+
+      // Add the new item to the cart
+      cart.add(newCartItem);
+
+      // Update the user's cart in Firestore
+      await userRef.update({'cart': cart});
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("자신의 마켓 상품은 구매할 수 없습니다."),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
-
-    final cart = userDoc.data()?['cart'] ?? [];
-    final newCartItem = {
-      'sellId': widget.sellPost.sellId,
-      'title': widget.sellPost.title,
-      'img': widget.sellPost.img,
-      'price': widget.sellPost.price,
-      'category': widget.sellPost.category,
-      'body': widget.sellPost.body,
-      'marketId': widget.sellPost.marketId,
-      'marketName': marketName, // 추가: 마켓 이름 추가
-      'shippingFee': widget.sellPost.shippingFee,
-      'reference': widget.sellPost.reference.path,
-    };
-
-    // Add the new item to the cart
-    cart.add(newCartItem);
-
-    // Update the user's cart in Firestore
-    await userRef.update({'cart': cart});
   }
 
   Future<void> _checkIfFavorite() async {
@@ -143,6 +154,27 @@ class _FeedDetailState extends State<FeedDetail> {
     });
   }
 
+  Future<List<String>> getDonaListImage() async {
+    try {
+      final String documentId = widget.sellPost.sellId;
+
+      final QuerySnapshot donaListSnapshot = await FirebaseFirestore.instance
+          .collection('SellPosts')
+          .doc(documentId)
+          .collection('DonaList')
+          .get();
+
+      List<String> donaImages = donaListSnapshot.docs
+          .map((doc) => doc['donaImg'][0] as String)
+          .toList();
+
+      return donaImages;
+    } catch (e) {
+      print('이미지 가져오는 중 오류 발생: $e');
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,11 +195,11 @@ class _FeedDetailState extends State<FeedDetail> {
                 children: [
                   _marketInfoBuild(context),
                   SizedBox(height: 16),
-                  // 재고 정보 출력 추가 (재고 0일 때 '재고 없음'으로 출력)
+                  // 재고 정보 출력 (재고가 없으면 '재고 없음' 출력)
                   Text(
                     widget.sellPost.stock > 0
-                        ? '재고 : ${widget.sellPost.stock}개' // 재고가 있으면 수량 출력
-                        : '재고 없음', // 재고가 0일 경우
+                        ? '재고 : ${widget.sellPost.stock}개'
+                        : '재고 없음',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -176,6 +208,87 @@ class _FeedDetailState extends State<FeedDetail> {
                   ),
                   SizedBox(height: 16),
                   Text(widget.sellPost.body, style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 15),
+                  FutureBuilder<List<String>>(
+                    future: getDonaListImage(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Text('이미지를 불러오는데 실패했습니다');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return SizedBox.shrink(); // 없으면 아무것도 표시하지 않음
+                      } else {
+                        List<String> images = snapshot.data!;
+
+                        List<List<String>> imageGroups = [];
+                        for (int i = 0; i < images.length; i += 3) {
+                          imageGroups.add(images.sublist(
+                            i,
+                            i + 3 > images.length ? images.length : i + 3,
+                          ));
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '🌱  해당 기부제품으로 만들었어요',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 1,
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: SizedBox(
+                                  height: 180,
+                                  child: PageView.builder(
+                                    itemCount: imageGroups.length,
+                                    itemBuilder: (context, index) {
+                                      List<String> group = imageGroups[index];
+
+                                      // 이미지가 1개일 때 Center로 감싸기
+                                      if (group.length == 1) {
+                                        return Center(
+                                          child:
+                                          _buildImageContainer(group.first),
+                                        );
+                                      }
+
+                                      // 이미지가 2개 이상일 때 Row로 배치
+                                      return Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                        children: group
+                                            .map((imageUrl) =>
+                                            _buildImageContainer(imageUrl))
+                                            .toList(),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -183,6 +296,40 @@ class _FeedDetailState extends State<FeedDetail> {
         ),
       ),
       bottomNavigationBar: _bottomNaviBar(),
+    );
+  }
+
+  Widget _buildImageContainer(String imageUrl) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.0),
+              border: Border.all(
+                color: Colors.grey.shade300,
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 1,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.hardEdge,
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -204,16 +351,15 @@ class _FeedDetailState extends State<FeedDetail> {
                   onPressed: _toggleFavorite,
                 ),
                 SizedBox(width: 8),
-                Text(
-                  '${widget.sellPost.price}원',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+                PriceDisplay(price: widget.sellPost.price, fontSize:20),
               ],
             ),
             ElevatedButton.icon(
               onPressed: _addToCart,
               icon: Icon(Icons.shopping_cart, color: Colors.black54),
-              label: Text('장바구니 담기', style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold)),
+              label: Text('장바구니 담기',
+                  style: TextStyle(
+                      color: Colors.black54, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
               ),
@@ -251,7 +397,8 @@ class _FeedDetailState extends State<FeedDetail> {
         }
 
         String marketName = marketData['name'] ?? 'Unknown Market';
-        String marketImage = marketData['img'] ?? 'https://via.placeholder.com/150';
+        String marketImage =
+            marketData['img'] ?? 'https://via.placeholder.com/150';
         String businessNumber = marketData['business_number'] ?? '';
 
         return InkWell(
@@ -270,77 +417,84 @@ class _FeedDetailState extends State<FeedDetail> {
     );
   }
 
-  Row _marketView(String marketImage, String marketName, String businessNumber) {
-    return Row(
+  Column _marketView(
+      String marketImage, String marketName, String businessNumber) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          backgroundImage: CachedNetworkImageProvider(marketImage),
-          radius: 30,
+        Padding(
+          padding: const EdgeInsets.only(left: 2.0),
+          child: Text(
+            widget.sellPost.title,
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-        SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              widget.sellPost.title,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
+            CircleAvatar(
+              backgroundImage: CachedNetworkImageProvider(marketImage),
+              radius: 30,
             ),
-            SizedBox(height: 8),
+            SizedBox(width: 16),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   marketName,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 ),
                 if (businessNumber.isNotEmpty) // 비즈니스 넘버가 존재할 때 체크 아이콘 추가
                   Padding(
-                    padding: const EdgeInsets.only(left: 4.0), // 아이콘과 텍스트 간격 조절
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Colors.blue, // 체크 아이콘 색상 설정
-                      size: 18, // 아이콘 크기 설정
+                    padding: const EdgeInsets.only(left: 3.0,), // 아이콘과 텍스트 간격 조절
+                    child: Image.asset(
+                      'assets/images/ecore_2_logo.png', // 로고 이미지 파일 경로
+                      width: 30, // 이미지의 너비
+                      height: 30, // 이미지의 높이
                     ),
                   ),
               ],
             ),
+            Spacer(),
+            IconButton(
+              onPressed: () {
+                if (currentUserId == marketUserId) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        content: Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: Text("자신의 마켓과는 채팅이 불가합니다."),
+                        ),
+                        actions: [
+                          TextButton(
+                            child: Text("확인"),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // 다이얼로그 닫기
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatBanner(
+                          marketId: widget.sellPost.marketId,
+                          sellId: widget.sellPost.sellId),
+                    ),
+                  );
+                }
+              },
+              icon: Icon(Icons.mail, size: 30),
+            )
           ],
         ),
-        Spacer(),
-        IconButton(
-          onPressed: () {
-            if (currentUserId == marketUserId) {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    content: Padding(
-                      padding: const EdgeInsets.only(top: 15),
-                      child: Text("자신의 마켓과는 채팅이 불가합니다."),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text("확인"),
-                        onPressed: () {
-                          Navigator.of(context).pop(); // 다이얼로그 닫기
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            } else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatBanner(marketId: widget.sellPost.marketId, sellId: widget.sellPost.sellId),
-                ),
-              );
-            }
-          },
-          icon: Icon(Icons.mail, size: 30),
-        )
       ],
     );
   }
@@ -366,7 +520,7 @@ class _FeedDetailState extends State<FeedDetail> {
             itemBuilder: (context, index) {
               return CachedNetworkImage(
                 imageUrl: images[index],
-                fit: BoxFit.cover,  // 이미지를 가로폭에 맞춰 전체 화면에 걸쳐 표시
+                fit: BoxFit.cover, // 이미지를 가로폭에 맞춰 전체 화면에 걸쳐 표시
                 errorWidget: (context, url, error) => Icon(Icons.error),
                 placeholder: (context, url) => CircularProgressIndicator(),
               );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/firestore/market_model.dart';
 import '../models/firestore/sell_post_model.dart';
-import '../sell_donation_page/sell_product_form.dart';
 import 'my_market_feedpage.dart';
 import 'my_market_productpage.dart';
 import 'my_market_reviewpage.dart';
@@ -72,7 +71,7 @@ class _MyMarketBannerState extends State<MyMarketBanner> {
             backgroundColor: Colors.white, // 배경색 흰색으로 설정
             body: Column(
               children: [
-                // 배너 이미지와 글쓰기 버튼 영역
+                // 배너 이미지 영역 (글쓰기 버튼 제거됨)
                 Stack(
                   children: [
                     Container(
@@ -94,34 +93,6 @@ class _MyMarketBannerState extends State<MyMarketBanner> {
                         ),
                       )
                           : null,
-                    ),
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: TextButton.icon(
-                        onPressed: () {
-                          // 글쓰기 버튼 동작
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SellProductForm(
-                                name: market.name, // marketId 전달
-                              ),
-                            ),
-                          );
-                        },
-                        icon: Icon(Icons.edit, color: Colors.white),
-                        label: Text(
-                          '글쓰기',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.black.withOpacity(0.3), // 반투명 배경
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -181,7 +152,7 @@ class _MyMarketBannerState extends State<MyMarketBanner> {
                       // 상품 페이지를 MyMarketProductpage 위젯으로 교체
                       MyMarketProductpage(marketId: market.marketId),
                       // 피드 페이지
-                      MyMarketFeedpage(marketId: market.marketId,),
+                      MyMarketFeedPage(marketId: market.marketId,),
                       // 리뷰 페이지
                       MyMarketReviewPage(marketId: market.marketId), // marketId 전달
                     ],

@@ -26,7 +26,7 @@ class SplashScreen extends StatelessWidget {
           );
         },
         child: Center(
-          child: Image.asset('assets/images/ecore_logo.png'), // 로고 이미지 경로를 지정하세요.
+          child: Image.asset('assets/images/logo.png'), // 로고 이미지 경로를 지정하세요.
         ),
       ),
     );

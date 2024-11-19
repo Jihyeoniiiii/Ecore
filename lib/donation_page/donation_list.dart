@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../home_page/category_button.dart';
 import '../models/firestore/dona_post_model.dart';
 import '../widgets/view_counter.dart';
@@ -90,7 +89,6 @@ class _DonationListState extends State<DonationList> {
   }
 
   Widget _postHeader(DonaPostModel donaPost) {
-    // 이미지 크기 조정 (1.5배 확대)
     final String firstImageUrl = donaPost.img.isNotEmpty ? donaPost.img[0] : 'https://via.placeholder.com/100';
 
     return OutlinedButton(
@@ -110,7 +108,6 @@ class _DonationListState extends State<DonationList> {
       ),
       child: Row(
         children: [
-          // 이미지 크기 조정 (1.5배 확대)
           Padding(
             padding: const EdgeInsets.all(6.0), // 패딩 약간 늘림
             child: ClipRRect(
@@ -137,34 +134,65 @@ class _DonationListState extends State<DonationList> {
                     color: Colors.black87,
                   ),
                 ),
+                Row(
+                  children: [
+                    Text(
+                      '상태: ${donaPost.condition}', // 상태 표시
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      _timeAgo(donaPost.createdAt), // 업로드 시간 표시
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4), // 상태와 시간 사이의 간격
+                Text(
+                  donaPost.body, // 상세 내용 표시
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis, // 두 줄 넘어가면 생략
+                ),
               ],
             ),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (String value) {
-              if (value == 'report') {
-                _showReportDialog();  // Show report dialog
-              } else if (value == 'hide') {
-                // Hide logic
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem(
-                  value: 'report',
-                  child: Text('신고'),
-                ),
-                PopupMenuItem(
-                  value: 'hide',
-                  child: Text('숨기기'),
-                ),
-              ];
-            },
           ),
         ],
       ),
     );
   }
+
+  String _timeAgo(DateTime dateTime) {
+    final Duration difference = DateTime.now().difference(dateTime);
+
+    if (difference.inDays >= 365) {
+      final years = (difference.inDays / 365).floor();
+      return '$years년 전';
+    } else if (difference.inDays >= 30) {
+      final months = (difference.inDays / 30).floor();
+      return '$months달 전';
+    } else if (difference.inDays > 1) {
+      return '${difference.inDays}일 전';
+    } else if (difference.inDays == 1) {
+      return '어제';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}시간 전';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}분 전';
+    } else {
+      return '방금 전';
+    }
+  }
+
 
   void _showReportDialog() {
     showDialog(

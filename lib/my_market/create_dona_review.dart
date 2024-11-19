@@ -1,0 +1,229 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../home_page/home_page_menu.dart';
+
+class CreateDonaReview extends StatefulWidget {
+  final String orderId;
+  final int itemIndex;
+  final String itemTitle;
+  final String itemImg;
+  final int itemPrice;
+  final String marketId;
+  final String userId; // 추가: 사용자 ID
+
+  const CreateDonaReview({
+    Key? key,
+    required this.orderId,
+    required this.itemIndex,
+    required this.itemTitle,
+    required this.itemImg,
+    required this.itemPrice,
+    required this.marketId,
+    required this.userId, // 추가: 사용자 ID
+  }) : super(key: key);
+
+  @override
+  _CreateReviewState createState() => _CreateReviewState();
+}
+
+class _CreateReviewState extends State<CreateDonaReview> {
+  final TextEditingController _reviewController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  String? satisfaction; // "예" 또는 "아니요" 선택값
+  double rating = 0.0; // 별점 값
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('리뷰 작성'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildItemInfo(),
+                SizedBox(height: 16),
+                Text('구매하신 상품은 만족하시나요?', style: TextStyle(fontSize: 16)),
+                _buildSatisfactionRadio(),
+                SizedBox(height: 16),
+                Text('별점', style: TextStyle(fontSize: 16)),
+                _buildStarRating(),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: _reviewController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    labelText: '자세한 리뷰를 작성해주세요',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '리뷰를 입력해 주세요';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      _submitReview();
+                    }
+                  },
+                  child: Text('제출'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemInfo() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: Image.network(
+            widget.itemImg ?? 'https://via.placeholder.com/150',
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Image.asset('assets/images/placeholder.png');
+            },
+          ),
+        ),
+        SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.itemTitle,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '가격: ${widget.itemPrice}원',
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSatisfactionRadio() {
+    return Row(
+      children: [
+        Expanded(
+          child: RadioListTile<String>(
+            title: Text('예'),
+            value: '예',
+            groupValue: satisfaction,
+            onChanged: (value) {
+              setState(() {
+                satisfaction = value;
+              });
+            },
+          ),
+        ),
+        Expanded(
+          child: RadioListTile<String>(
+            title: Text('아니요'),
+            value: '아니요',
+            groupValue: satisfaction,
+            onChanged: (value) {
+              setState(() {
+                satisfaction = value;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStarRating() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: List.generate(5, (index) {
+        return IconButton(
+          icon: Icon(
+            Icons.star,
+            color: index < rating ? Colors.orange : Colors.grey,
+          ),
+          onPressed: () {
+            setState(() {
+              rating = index + 1.0;
+            });
+          },
+        );
+      }),
+    );
+  }
+
+  Future<void> _submitReview() async {
+    if (satisfaction == null || rating == 0.0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('만족도와 별점을 선택해 주세요')),
+      );
+      return;
+    }
+
+    final reviewText = _reviewController.text;
+
+    final reviewData = {
+      'review': reviewText,
+      'satisfaction': satisfaction,
+      'rating': rating,
+      'timestamp': FieldValue.serverTimestamp(),
+      'userId': widget.userId, // 수정된 부분: 전달받은 userId 저장
+      'orderId': widget.orderId,
+      'itemIndex': widget.itemIndex,
+      'itemTitle': widget.itemTitle,
+      'marketId': widget.marketId,
+      'byseller_review': 'true',
+    };
+
+    try {
+      await FirebaseFirestore.instance.collection('Reviews').add(reviewData);
+
+      final itemsSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(widget.userId) // 수정된 부분: 전달받은 userId 사용
+          .collection('Orders')
+          .doc(widget.orderId)
+          .collection('items')
+          .where('title', isEqualTo: widget.itemTitle)
+          .where('price', isEqualTo: widget.itemPrice)
+          .get();
+
+      if (itemsSnapshot.docs.isNotEmpty) {
+        final itemDoc = itemsSnapshot.docs.first;
+        await itemDoc.reference.update({'reviewed': true});
+      } else {
+        print('Item not found');
+      }
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+            (route) => false,
+      );
+    } catch (error) {
+      print('Error updating reviewed status: $error');
+    }
+  }
+}

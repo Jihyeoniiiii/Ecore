@@ -302,7 +302,7 @@ class _SelectChatRoomState extends State<SelectChatRoom> {
             future: _fetchProductInfo(widget.chatId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator(); // 로딩 중일 때 표시할 위젯
+                return Text("상품을 불러옵니다.");
               }
 
               if (snapshot.hasError) {
@@ -312,7 +312,7 @@ class _SelectChatRoomState extends State<SelectChatRoom> {
               final productData = snapshot.data ?? {};
               final imageUrl = productData['img'][0] ?? 'https://via.placeholder.com/150'; // 이미지 URL
               final title = productData['title'] ?? '상품 제목 없음'; // 상품 제목
-              final price = productData['price'] ?? 0; // 상품 가격
+              final price = (productData['price'] as num?)?.toInt() ?? 0;
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -397,7 +397,7 @@ class _SelectChatRoomState extends State<SelectChatRoom> {
                           builder: (context, userSnapshot) {
                             if (userSnapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return CircularProgressIndicator();
+                              return Center(child: Text("🕓"));
                             }
 
                             if (userSnapshot.hasError ||

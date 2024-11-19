@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
 import '../models/firestore/user_model.dart';
+import '../my_market/ordered_dona_page.dart';
 import '../my_page/my_address_form.dart';
 import 'my_address_select.dart';
 import 'order_list.dart';
@@ -39,6 +40,8 @@ class _PayPageState extends State<PayPage> {
   int userPoints = 0; // 유저가 보유한 포인트
   int remainingPrice = 0; // 포인트 적용 후 남은 결제 금액
   int discount = 0; // 할인 금액
+  bool isDonaOrderId = false;
+  String buyerMarketId = '';
 
   @override
   void initState() {
@@ -82,6 +85,7 @@ class _PayPageState extends State<PayPage> {
       });
     }
   }
+
 
   Future<void> _fetchDefaultAddress() async {
     if (user != null) {
@@ -136,6 +140,17 @@ class _PayPageState extends State<PayPage> {
             totalShippingFee += (item['shippingFee'] as num).toInt() ?? 0;
           }
         }
+
+        // 재고 수 확인
+        final sellPostDoc = await FirebaseFirestore.instance
+            .collection('SellPosts')
+            .doc(item['sellId'])
+            .get();
+
+        if (sellPostDoc.exists) {
+          int stock = sellPostDoc.data()?['stock'] ?? 0;
+          item['stock'] = stock; // 재고 수를 아이템에 추가
+        }
       }
 
       setState(() {
@@ -149,6 +164,7 @@ class _PayPageState extends State<PayPage> {
     }
   }
 
+
   Future<void> _createOrder() async {
     final userModel = Provider.of<UserModel>(context, listen: false);
 
@@ -157,35 +173,45 @@ class _PayPageState extends State<PayPage> {
       for (var item in widget.cartItems) {
         // 구매자의 marketId 가져오기
         final buyerDoc = await FirebaseFirestore.instance.collection('Users').doc(user!.uid).get();
-        final String buyerMarketId = buyerDoc['marketId']; // 구매자의 marketId
+        // buyerMarketId = buyerDoc['marketId'] ?? ''; // null 처리
+        // if (buyerMarketId.isEmpty) {
+        //   throw Exception('Buyer marketId not found');
+        // }
 
         // 기부글 구매 시 DonaOrders에 추가
         if (item['donaId'] != null) {
-          print("donaId: " + item['donaId']);
-          // 기부글 정보를 가져오기 위해 DonaPosts에서 userId를 가져옵니다.
-          final donaPostRef = FirebaseFirestore.instance.collection('DonaPosts').doc(item['donaId']);
-          final donaPostDoc = await donaPostRef.get();
 
-          if (donaPostDoc.exists) {
-            final String donorUserId = donaPostDoc['userId']; // 기부자의 userId
+          try {
+            // 도네이션 포스트 조회
+            final donaPostRef = FirebaseFirestore.instance.collection('DonaPosts').doc(item['donaId']);
+            final donaPostDoc = await donaPostRef.get();
 
-            // 기부자의 username을 가져오기 위해 Users 컬렉션 조회
-            final donorDoc = await FirebaseFirestore.instance.collection('Users').doc(donorUserId).get();
+            if (!donaPostDoc.exists) {
+              print("Error: DonaPost does not exist.");
+              return; // 포스트가 없으면 함수 종료
+            }
 
-            if (donorDoc.exists) {
-              final String donorUsername = donorDoc['username'] ?? 'Unknown'; // 기부자의 username
-              print("donorUsername: " + donorUsername); // 기부자의 username 출력
+            final String donorUserId = donaPostDoc['userId'];
 
-              // 구매자의 marketId가 비어있지 않은 경우에만 DonaOrders에 추가
+            try {
+              // 기부자 정보 조회
+              final donorDoc = await FirebaseFirestore.instance.collection('Users').doc(donorUserId).get();
+              if (!donorDoc.exists) {
+                print("DonaPost data: ${donaPostDoc.data()}");
+                return;
+              }
+
+              final String donorUsername = donorDoc['username'] ?? 'Unknown';
+
               if (buyerMarketId.isNotEmpty) {
                 final donaOrderRef = FirebaseFirestore.instance
                     .collection('Markets')
-                    .doc(buyerMarketId) // 구매자의 marketId
+                    .doc(buyerMarketId)
                     .collection('DonaOrders');
 
                 await donaOrderRef.add({
-                  'userId': donorUserId, // 기부자의 userId
-                  'username': donorUsername, // 기부자의 username
+                  'userId': donorUserId,
+                  'username': donorUsername,
                   'donaId': item['donaId'],
                   'title': item['title'],
                   'price': item['price'],
@@ -194,25 +220,30 @@ class _PayPageState extends State<PayPage> {
                   'donaImg': item['img'],
                 });
 
-                // 기부자에게 포인트 추가
-                int donationPoints = ((item['price'] * 0.05).toInt()); // 5% 포인트
+                int donationPoints = item['point'];
                 await FirebaseFirestore.instance.collection('Users').doc(donorUserId).update({
                   'points': FieldValue.increment(donationPoints), // 기부자에게 포인트 추가
                 });
 
-                // 사용자 서브컬렉션에 포인트 기록 저장
-                await FirebaseFirestore.instance.collection('Users').doc(donorUserId).collection('PointHistory').add({
+                await FirebaseFirestore.instance.collection('Users').doc(donorUserId)
+                    .collection('PointHistory').add({
                   'point': donationPoints,
                   'timestamp': FieldValue.serverTimestamp(),
-                  'type': 'earn' // 적립이라는 것을 구분하기 위한 필드
+                  'name': '기부글',
+                  'type': 'earn',
                 });
               }
+            } catch (e) {
+              print("Error fetching donor document: $e");
             }
+          } catch (e) {
+            print("Error fetching donaPost document: $e");
           }
         }
 
+
         // 판매글 구매 시
-        if (item['sellId'] != null && buyerMarketId.isNotEmpty) {
+        if (item['sellId'] != null) {
           // Users/{userId}/Orders에 판매글 구매 내역 저장
           DocumentReference userOrderRef = await FirebaseFirestore.instance
               .collection('Users')
@@ -261,10 +292,34 @@ class _PayPageState extends State<PayPage> {
             await userRef.collection('PointHistory').add({
               'point': pointForDonaUser,
               'timestamp': FieldValue.serverTimestamp(),
+              'name' : '판매글',
               'type': 'earn' // 적립이라는 것을 구분하기 위한 필드
             });
           }
+          // 재고 수 감소
+          final sellPostRef = FirebaseFirestore.instance.collection('SellPosts').doc(item['sellId']);
+          await sellPostRef.update({
+            'stock': FieldValue.increment(-1), // 재고 감소
+          });
         }
+
+        final sellOrderRef = FirebaseFirestore.instance
+            .collection('Markets')
+            .doc(item['marketId'])
+            .collection('SellOrders');
+
+        await sellOrderRef.add({
+          'userId': user!.uid, // 구매자 ID
+          'username': username, // 구매자 username 추가
+          'sellId': item['sellId'], // 판매글 ID
+          'title': item['title'], // 상품명
+          'price': item['price'], // 가격
+          'date': FieldValue.serverTimestamp(), // 주문 날짜
+          'paymentMethod': _selectedPaymentMethod, // 결제 방법
+          'shippingStatus': '배송 준비', // 배송 상태
+          'quantity': item['quantity'] ?? 1, // 구매 수량 (기본값 1)
+          'sellImg': item['img'], // 상품 이미지 추가
+        });
       }
 
       // 포인트 사용 처리 (사용된 포인트 차감 및 기록)
@@ -323,25 +378,36 @@ class _PayPageState extends State<PayPage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(55.0),
         child: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          automaticallyImplyLeading: false,
-          flexibleSpace: Container(
-            color: baseColor,
-            child: Center(
-              child: Text(
+          backgroundColor: baseColor,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Spacer를 사용하여 버튼과 텍스트 사이의 공간을 조정
+              Expanded(
+                child: Container(),
+              ),
+              Text(
                 "주문",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
+              Expanded(
+                child: Container(),
+              ),
+              Expanded(
+                child: Container(),
+              ),
+            ],
           ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          titleSpacing: 0, // title과 leading 사이의 기본 간격을 제거
         ),
       ),
       body: RefreshIndicator(
@@ -624,32 +690,67 @@ class _PayPageState extends State<PayPage> {
     }
 
     return widget.cartItems.map((item) {
-      final imageUrl =
-          (item['img'] as List<dynamic>?)?.first ??
-              'https://via.placeholder.com/150';
+      final imageUrl = (item['img'] as List<dynamic>?)?.first ??
+          'https://via.placeholder.com/150';
+
+      // 재고 상태에 따라 색상 결정
+      Color stockColor = (item['stock'] == 1) ? Colors.redAccent : Colors.black54;
+
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.network(
-              imageUrl,
-              height: 100,
-              width: 100,
-              fit: BoxFit.cover,
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Card(
+          color: Colors.white, // 카드 색상을 하얀색으로 설정
+          elevation: 2, // 그림자 효과
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // 모서리 둥글게
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0), // 이미지 모서리 둥글게
+                  child: Image.network(
+                    imageUrl,
+                    height: 100,
+                    width: 100,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item['title'],
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold, // 상품명 굵게
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '가격: ${item['price']}원',
+                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '재고: ${item['stock']}개', // 재고 표시
+                        style: TextStyle(fontSize: 14, color: stockColor), // 재고 색상 설정
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: 15),
-            Expanded(
-              child: Text(
-                '상품명: ${item['title']}  가격: ${item['price']}원',
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
+          ),
         ),
       );
     }).toList();
   }
+
 
   Widget _buildPriceSummary() {
     return Column(
@@ -710,8 +811,11 @@ class _PayPageState extends State<PayPage> {
                   height: 30,
                   child: TextField(
                     controller: _pointController, // 포인트 입력 필드 컨트롤러
+                    textAlign: TextAlign.left,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 8), // 세로 중앙에 위치하도록 패딩 설정
+
                     ),
                   ),
                 ),
@@ -804,10 +908,18 @@ class _PayPageState extends State<PayPage> {
         onPressed: () async {
           if (_isChecked) {
             await _createOrder();
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => OrderList()),
-            );
+
+            if (isDonaOrderId) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => OrderedDonaPage(marketId: buyerMarketId,)),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => OrderList()),
+              );
+            }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('주문 내용을 확인하고 동의해야 합니다.')),
@@ -819,7 +931,7 @@ class _PayPageState extends State<PayPage> {
           side: BorderSide.none,
         ),
         child: Text(
-          '주문',
+          '결제하기',
           style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+import '../signinup_page/terms.dart';
+
 class PointHistoryPage extends StatefulWidget {
   @override
   _PointHistoryPageState createState() => _PointHistoryPageState();
@@ -12,6 +14,14 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
   final user = FirebaseAuth.instance.currentUser;
   String _filter = 'all'; // 초기 필터: 전체
   int userPoints = 0; // 보유 포인트
+
+  // 튜토리얼 이미지 목록
+  final List<String> _tutorialImages = [
+    'assets/images/points/001.png',
+    'assets/images/points/002.png',
+    'assets/images/points/003.png',
+    'assets/images/points/004.png',
+  ];
 
   @override
   void initState() {
@@ -51,18 +61,46 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('포인트 내역'),
+        title: Text('포인트 내역', style: TextStyle(fontFamily: 'NanumSquare',)),
       ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '보유 포인트: $userPoints P',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24, // 글씨 크기를 약간 키움
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '보유 포인트: $userPoints P',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24, // 글씨 크기를 약간 키움
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TermsDetailPage(title: '포인트 이용 약관'),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    '포인트 이용 약관',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _showTutorial,
+                  child: Text('포인트 안내 보기 >'),
+                ),
+              ],
             ),
           ),
           // 필터 버튼
@@ -109,10 +147,11 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
                     final dateString = DateFormat('yyyy-MM-dd').format(timestamp);
                     final point = data['point'] as int;
                     final type = data.containsKey('type') ? data['type'] : 'earn'; // containsKey 사용 가능
+                    final name = data.containsKey('name') ? data['name'] : '기타'; // 'name' 필드 가져오기
 
-                    // 적립/사용/소멸 표시 방식
+                    // 적립/사용/소멸 표시 방식 및 name 필드에 따른 적립 유형 표시
                     final pointDisplay = type == 'use' ? '-${point}P' : '+${point}P';
-                    final typeDisplay = type == 'use' ? '사용' : type == 'expire' ? '소멸' : '적립';
+                    final typeDisplay = type == 'use' ? '사용' : type == 'expire' ? '소멸' : '$name 적립';
 
                     return Card(
                       color: Colors.white,
@@ -148,6 +187,7 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
                     );
                   },
                 );
+
               },
             ),
           ),
@@ -155,6 +195,24 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
       ),
     );
   }
+
+  // 포인트 튜토리얼을 보여주는 함수
+  void _showTutorial() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.5), // 배경을 반투명하게 설정
+      builder: (context) {
+        return Center(
+          child: Container(
+            width: 300,
+            height: 400,
+            child: TutorialPage(tutorialImages: _tutorialImages),
+          ),
+        );
+      },
+    );
+  }
+
 
   // 필터 버튼 생성
   ElevatedButton _buildFilterButton(String label, String value) {
@@ -172,6 +230,96 @@ class _PointHistoryPageState extends State<PointHistoryPage> {
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12), // 버튼 크기 조절
       ),
       child: Text(label),
+    );
+  }
+}
+
+class TutorialPage extends StatefulWidget {
+  final List<String> tutorialImages;
+
+  TutorialPage({required this.tutorialImages});
+
+  @override
+  _TutorialPageState createState() => _TutorialPageState();
+}
+
+class _TutorialPageState extends State<TutorialPage> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: Image.asset(
+                  widget.tutorialImages[_currentIndex],
+                  width: 300, // 원하는 이미지 너비
+                  height: 400, // 원하는 이미지 높이
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ],
+        ),
+        // 닫기 버튼 (상단 오른쪽, 흰색 X)
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IconButton(
+            icon: Icon(Icons.close, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).pop(); // 팝업 닫기
+            },
+          ),
+        ),
+        Positioned(
+          bottom: 24,
+          right: 24,
+          child: GestureDetector(
+            onTap: _currentIndex < widget.tutorialImages.length - 1
+                ? () {
+              setState(() {
+                _currentIndex++;
+              });
+            }
+                : null, // 마지막 이미지일 때 비활성화
+            child: Text(
+              '다음',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 24,
+          left: 24,
+          child: GestureDetector(
+            onTap: _currentIndex > 0
+                ? () {
+              setState(() {
+                _currentIndex--;
+              });
+            }
+                : null, // 첫 번째 이미지일 때 비활성화
+            child: Text(
+              '이전',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

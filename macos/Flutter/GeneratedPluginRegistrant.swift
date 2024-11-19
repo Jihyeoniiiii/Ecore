@@ -12,7 +12,7 @@ import firebase_core
 import firebase_storage
 import google_sign_in_ios
 import path_provider_foundation
-import sqflite
+import sqflite_darwin
 import webview_flutter_wkwebview
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {

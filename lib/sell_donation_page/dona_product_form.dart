@@ -1,8 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:typed_data'; // Uint8List를 사용하기 위해 임포트
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 
 class DonaProductForm extends StatefulWidget {
@@ -12,6 +15,8 @@ class DonaProductForm extends StatefulWidget {
 
 class _DonaProductFormState extends State<DonaProductForm> {
   final _formKey = GlobalKey<FormState>();
+  Uint8List? _imageData; // 서버에서 받은 이미지 데이터
+  XFile? _aiImage; // Single image for AI processing
   List<XFile>? _images = []; // 여러 이미지를 저장할 리스트
   final picker = ImagePicker();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -26,7 +31,18 @@ class _DonaProductFormState extends State<DonaProductForm> {
   final TextEditingController _colorController = TextEditingController();
   final TextEditingController _pointController = TextEditingController(); // 포인트 입력 필드
   String? _categoryValue;
+  XFile? _singleImage;
+  int? _points;
   String? _selectedCondition = 'S';
+  String? _condition = ''; // AI-processed condition display
+  String _serverUrl = 'http://1.235.3.54:8088/upload';
+
+  Future<void> getSingleImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _singleImage = pickedFile;
+    });
+  }
 
   Future<void> getImages() async {
     if (_images!.length >= 10) {
@@ -36,12 +52,59 @@ class _DonaProductFormState extends State<DonaProductForm> {
       return; // 이미 10개 이상의 이미지가 선택된 경우 추가 선택 불가
     }
 
+    // AI image picker and uploader
+    Future<void> pickAiImage() async {
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      setState(() {
+        _aiImage = pickedFile;
+      });
+    }
+
     final pickedFiles = await picker.pickMultiImage();
     if (pickedFiles != null) {
       setState(() {
         // 최대 10개를 초과하지 않도록 리스트에 추가
         _images = (_images! + pickedFiles).take(10).toList();
       });
+    }
+  }
+
+  Future<void> uploadSingleImage() async {
+    if (_singleImage == null) return;
+
+    try {
+      var uri = Uri.parse(_serverUrl);
+      var request = http.MultipartRequest('POST', uri);
+      request.files.add(await http.MultipartFile.fromPath(
+        'file',
+        _singleImage!.path,
+        filename: path.basename(_singleImage!.path),
+      ));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        final bytes = await http.Response.fromStream(response);
+        setState(() {
+          _imageData = bytes.bodyBytes as Uint8List?; // Uint8List 형태로 저장
+        });
+      } else {
+        print('이미지 업로드 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('이미지 업로드 중 오류 발생: $e');
+    }
+  }
+
+  String _evaluateCondition(int points) {
+    if (points >= 80) {
+      return 'S';
+    } else if (points >= 60) {
+      return 'A';
+    } else if (points >= 40) {
+      return 'B';
+    } else {
+      return 'C';
     }
   }
 
@@ -80,6 +143,8 @@ class _DonaProductFormState extends State<DonaProductForm> {
     return downloadUrls;
   }
 
+
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final title = _titleController.text;
@@ -88,17 +153,18 @@ class _DonaProductFormState extends State<DonaProductForm> {
       final color = _colorController.text;
       final condition = _selectedCondition;
       final body = _bodyController.text;
-      final point = int.tryParse(_pointController.text) ?? 0; // 포인트 입력 값
+      final point = int.tryParse(_pointController.text) ?? 0;
 
       _showLoadingDialog();
 
       try {
-        List<String>? imageUrls;
+        // 1. 이미지를 Firebase Storage에 업로드하여 다운로드 URL을 가져옵니다.
+        List<String> imageUrls = [];
         if (_images != null && _images!.isNotEmpty) {
-          imageUrls = await uploadImages(_images!);
+          imageUrls = await uploadImages(_images!);  // 업로드 후 URL 리스트를 imageUrls에 저장
         }
 
-        // 현재 사용자의 UID를 user 필드로 추가
+        // 2. Firestore에 기부 상품 정보와 이미지 URL 리스트를 저장합니다.
         DocumentReference docRef = await _firestore.collection('DonaPosts').add({
           'title': title,
           'category': category,
@@ -106,19 +172,19 @@ class _DonaProductFormState extends State<DonaProductForm> {
           'color': color,
           'condition': condition,
           'body': body,
-          'img': imageUrls,
+          'img': imageUrls, // 업로드한 이미지 URL 리스트 저장
           'viewCount': 0,
           'createdAt': FieldValue.serverTimestamp(),
           'userId': currentUser?.uid, // 현재 사용자의 UID 추가
           'point': point, // 포인트 필드 추가
         });
 
-        // Users 컬렉션의 my_posts 배열에 문서 ID 추가
+        // 3. Users 컬렉션의 my_posts 배열에 문서 ID 추가
         await _firestore.collection('Users').doc(currentUser?.uid).update({
           'my_posts': FieldValue.arrayUnion([docRef.id]) // 새로운 문서 ID 추가
         });
 
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('기부 상품이 등록되었습니다.')),
@@ -127,7 +193,6 @@ class _DonaProductFormState extends State<DonaProductForm> {
         Navigator.pop(context);
       } catch (e) {
         Navigator.of(context).pop();
-
         print('Error adding document: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('문서 추가 실패: $e')),
@@ -135,6 +200,7 @@ class _DonaProductFormState extends State<DonaProductForm> {
       }
     }
   }
+
 
   void _showLoadingDialog() {
     showDialog(
@@ -178,6 +244,60 @@ class _DonaProductFormState extends State<DonaProductForm> {
           key: _formKey,
           child: ListView(
             children: <Widget>[
+              // AI image section
+              // AI image section
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start, // 위쪽 정렬
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: getSingleImage,
+                    child: Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: _singleImage == null
+                          ? Icon(Icons.camera_alt, size: 50)
+                          : Image.file(File(_singleImage!.path), fit: BoxFit.cover),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ElevatedButton(
+                          onPressed: uploadSingleImage,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 48), // 버튼을 가로로 길게
+                          ),
+                          child: Text('포인트 측정하기'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              if (_imageData != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Image.memory(_imageData!), // 서버에서 받은 이미지 데이터 표시
+                ),
+              if (_points != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 16),
+                    Text('포인트: $_points'),
+                    Text('물품 상태: $_condition'),
+                  ],
+                ),
+              SizedBox(height: 16),
+
+              // Post image section (keep as is)
               Row(
                 children: <Widget>[
                   GestureDetector(

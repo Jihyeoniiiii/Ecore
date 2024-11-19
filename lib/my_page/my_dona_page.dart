@@ -6,6 +6,7 @@ import '../models/firestore/dona_post_model.dart';
 import '../models/firestore/user_model.dart';
 import '../sell_donation_page/edit_dona_product_form.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // FirebaseAuth import 추가
+import 'package:cached_network_image/cached_network_image.dart'; // CachedNetworkImage import 추가
 
 class MyDonaPage extends StatelessWidget {
   @override
@@ -48,42 +49,98 @@ class MyDonaPage extends StatelessWidget {
                       ? post.img[0]
                       : 'https://via.placeholder.com/100';
 
-                  return ListTile(
-                    leading: Image.network(
-                      firstImageUrl,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    ),
-                    title: Text(
-                      post.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    subtitle: Text(
-                      post.body,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.more_vert), // 세로 점 아이콘
-                      onPressed: () {
-                        _showOptions(context, post);
-                      },
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DonaDetail(donaPost: post),
+                  return Column(
+                    children: [
+                      OutlinedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DonaDetail(donaPost: post),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+                          backgroundColor: Colors.white,
+                          side: BorderSide(color: Colors.grey[300]!, width: 1), // Light gray border color
+                          padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0), // 패딩
                         ),
-                      );
-                    },
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10.0), // 이미지 모서리 둥글게
+                                child: CachedNetworkImage(
+                                  imageUrl: firstImageUrl,
+                                  width: 105, // 이미지 너비
+                                  height: 105, // 이미지 높이
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, url, error) => Icon(Icons.error),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 12.0), // 텍스트와 이미지 간의 간격
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    post.title,
+                                    style: TextStyle(
+                                      fontSize: 18, // 텍스트 크기
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '상태: ${post.condition}', // 상태 표시
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        _timeAgo(post.createdAt), // 업로드 시간 표시
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[500],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4), // 상태와 시간 사이 간격
+                                  Text(
+                                    post.body, // 상세 내용 표시
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[700],
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis, // 두 줄 넘어가면 생략
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.more_vert), // 수정, 삭제 메뉴 아이콘
+                              onPressed: () {
+                                _showOptions(context, post); // 옵션 메뉴 표시
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(
+                        color: Colors.grey[300], // 구분선 색상
+                        thickness: 0.5, // 구분선 두께
+                        height: 1, // 구분선 높이
+                      ),
+                    ],
                   );
                 },
               );
@@ -200,6 +257,21 @@ class MyDonaPage extends StatelessWidget {
           SnackBar(content: Text('삭제 실패: $e')),
         );
       }
+    }
+  }
+
+  // 업로드 시간을 현재 시각과 비교하여 상대적으로 표시하는 함수
+  String _timeAgo(DateTime dateTime) {
+    final Duration difference = DateTime.now().difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}일 전';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}시간 전';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}분 전';
+    } else {
+      return '방금 전';
     }
   }
 }

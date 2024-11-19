@@ -26,7 +26,7 @@ class SearchResultsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search Results'),
+        title: Text('검색 결과'),
       ),
       body: ListView.builder(
         itemCount: combinedResults.length,

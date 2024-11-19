@@ -1,4 +1,5 @@
 import 'package:ecore/my_page/setting_page.dart';
+import 'package:ecore/my_page/user_profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -91,7 +92,7 @@ class _MyPageBtnState extends State<MyPageBtn> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Market Not Found'),
+          title: Text('마켓이 없습니다!'),
           content: Text('생성하시겠습니까?'),
           actions: [
             TextButton(
@@ -104,13 +105,14 @@ class _MyPageBtnState extends State<MyPageBtn> {
               child: Text('생성'),
               onPressed: () {
                 Navigator.of(context).pop(); // 팝업 닫기
-                Navigator.of(context).pushReplacement(
+                Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => SellerInfoForm(), // 마켓 생성 화면으로 이동
                   ),
                 );
               },
             ),
+
           ],
         );
       },
@@ -219,10 +221,18 @@ class _MyPageBtnState extends State<MyPageBtn> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => MyReviewPage(userModel: userModel!,)),
-                    );
+                    if (userModel != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyReviewPage(userModel: userModel!),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('사용자 정보가 없습니다.')),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: baseColor, // 배경색 설정
@@ -260,7 +270,7 @@ class _MyPageBtnState extends State<MyPageBtn> {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SettingPage(userId: userId),
+                        builder: (context) => UserProfilePage(userId: userId),
                       ),
                     );
 

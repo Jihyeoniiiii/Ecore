@@ -16,7 +16,8 @@ class DonaProductEditForm extends StatefulWidget {
 
 class _DonaProductEditFormState extends State<DonaProductEditForm> {
   final _formKey = GlobalKey<FormState>();
-  List<XFile>? _images = [];
+  List<XFile>? _newImages = [];
+  List<String> _existingImages = []; // 기존 이미지 URL
   final picker = ImagePicker();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -48,16 +49,15 @@ class _DonaProductEditFormState extends State<DonaProductEditForm> {
       _pointController.text = data['point']?.toString() ?? '';
       _selectedCondition = data['condition'] ?? 'S';
 
-      // 이미지 로딩
-      _images = (data['img'] as List<dynamic>?)
-          ?.map((url) => XFile(url))
-          .toList() ?? [];
+      // 기존 이미지 로드
+      _existingImages = List<String>.from(data['img'] ?? []);
+
       setState(() {});
     }
   }
 
   Future<void> getImages() async {
-    if (_images!.length >= 10) {
+    if (_newImages!.length + _existingImages.length >= 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('최대 10개의 이미지까지 선택할 수 있습니다.')),
       );
@@ -67,13 +67,13 @@ class _DonaProductEditFormState extends State<DonaProductEditForm> {
     final pickedFiles = await picker.pickMultiImage();
     if (pickedFiles != null) {
       setState(() {
-        _images = (_images! + pickedFiles).take(10).toList();
+        _newImages = (_newImages! + pickedFiles).take(10 - _existingImages.length).toList();
       });
     }
   }
 
   Future<void> captureImage() async {
-    if (_images!.length >= 10) {
+    if (_newImages!.length + _existingImages.length >= 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('최대 10개의 이미지까지 선택할 수 있습니다.')),
       );
@@ -83,7 +83,7 @@ class _DonaProductEditFormState extends State<DonaProductEditForm> {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
-        _images = (_images! + [pickedFile]).take(10).toList();
+        _newImages = (_newImages! + [pickedFile]).take(10 - _existingImages.length).toList();
       });
     }
   }
@@ -92,9 +92,10 @@ class _DonaProductEditFormState extends State<DonaProductEditForm> {
     List<String> downloadUrls = [];
     for (XFile imageFile in imageFiles) {
       try {
+        final file = File(imageFile.path);
         final fileName = DateTime.now().millisecondsSinceEpoch.toString();
         final ref = _storage.ref().child('images/$fileName');
-        final uploadTask = ref.putFile(File(imageFile.path));
+        final uploadTask = ref.putFile(file);
 
         final snapshot = await uploadTask.whenComplete(() {});
         final downloadUrl = await snapshot.ref.getDownloadURL();
@@ -120,9 +121,9 @@ class _DonaProductEditFormState extends State<DonaProductEditForm> {
       _showLoadingDialog();
 
       try {
-        List<String>? imageUrls;
-        if (_images != null && _images!.isNotEmpty) {
-          imageUrls = await uploadImages(_images!);
+        List<String> imageUrls = List.from(_existingImages);
+        if (_newImages != null && _newImages!.isNotEmpty) {
+          imageUrls.addAll(await uploadImages(_newImages!));
         }
 
         // Firestore에서 수정된 내용을 업데이트
@@ -255,55 +256,96 @@ class _DonaProductEditFormState extends State<DonaProductEditForm> {
                 ],
               ),
               SizedBox(height: 16),
-              _images != null && _images!.isNotEmpty
-                  ? SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _images!.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
-                              _images![index].path, // Firebase에서 URL 가져오기
-                              fit: BoxFit.cover,
-                              width: 100,
-                              height: 100,
-                            ),
-                          ),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _images!.removeAt(index); // 이미지 삭제
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                                child: Icon(
-                                  Icons.close,
-                                  color: Colors.grey[800],
-                                  size: 20,
+              if (_existingImages.isNotEmpty || _newImages != null && _newImages!.isNotEmpty)
+                SizedBox(
+                  height: 100,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _existingImages.length + _newImages!.length,
+                    itemBuilder: (context, index) {
+                      if (index < _existingImages.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  _existingImages[index],
+                                  fit: BoxFit.cover,
+                                  width: 100,
+                                  height: 100,
                                 ),
                               ),
-                            ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _existingImages.removeAt(index); // 기존 이미지 삭제
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                    child: Icon(
+                                      Icons.close,
+                                      color: Colors.grey[800],
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                  },
+                        );
+                      } else {
+                        int newIndex = index - _existingImages.length;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.file(
+                                  File(_newImages![newIndex].path),
+                                  fit: BoxFit.cover,
+                                  width: 100,
+                                  height: 100,
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _newImages!.removeAt(newIndex); // 새 이미지 삭제
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                    child: Icon(
+                                      Icons.close,
+                                      color: Colors.grey[800],
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ),
-              )
-                  : Container(),
               SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
